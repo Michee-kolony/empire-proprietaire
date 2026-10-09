@@ -1,10 +1,24 @@
 apply plugin: 'com.android.application'
 
+// Lit appId et appName depuis capacitor.config.ts (source unique de vérité)
+def capConfigFile = rootProject.file('../capacitor.config.ts')
+def readCapValue = { String key ->
+    def m = capConfigFile.text =~ /(?m)^\s*${key}\s*:\s*['"`]([^'"`]+)['"`]/
+    if (!m.find()) throw new GradleException("${key} introuvable dans ${capConfigFile}")
+    return m.group(1)
+}
+def capAppId = readCapValue('appId')
+def capAppName = readCapValue('appName')
+
 android {
     namespace = "com.empiresecurity.gardien"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.empiresecurity.gardien"
+        applicationId capAppId
+        resValue "string", "app_name", capAppName
+        resValue "string", "title_activity_main", capAppName
+        resValue "string", "package_name", capAppId
+        resValue "string", "custom_url_scheme", capAppId
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

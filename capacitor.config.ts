@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.empiresecurity.prorietaire',
-  appName: 'Empire Security',
+  appName: 'empire security',
   webDir: 'www'
 };
 

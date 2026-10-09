@@ -10,9 +10,13 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
+    "assets": "node scripts/generate-assets.mjs",
     "android": "npm run build && npx cap sync android && npx cap open android",
     "android:sync": "npm run build && npx cap sync android",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "ios": "npm run ios:sync && npx cap open ios",
+    "ios:sync": "npm run build && npx cap sync ios && node scripts/sync-ios-identity.mjs",
+    "ios:open": "npx cap open ios"
   },
   "private": true,
   "dependencies": {
