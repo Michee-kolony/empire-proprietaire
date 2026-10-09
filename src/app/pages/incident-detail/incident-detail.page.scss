@@ -1,0 +1,257 @@
+// Styles spécifiques au détail d'un incident (le reste vient de src/theme)
+
+.gd-id-succes {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  background: rgba(46, 204, 113, 0.12);
+  color: #15803d;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 17px;
+  }
+}
+
+.gd-id-tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--app-text);
+  }
+}
+
+.gd-id-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: rgba(230, 57, 70, 0.1);
+  color: #b3182b;
+  font-size: 26px;
+}
+
+.gd-id-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.gd-id-description {
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--app-text);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.gd-id-reponse {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border-left: 4px solid var(--gd-gold);
+  background: rgba(212, 175, 55, 0.12);
+
+  strong {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--gd-gold-dark);
+  }
+
+  p {
+    margin: 6px 0 0;
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--app-text);
+    white-space: pre-line;
+  }
+}
+
+.gd-id-attente {
+  margin: 8px 0 0;
+}
+
+.gd-id-adresse {
+  margin: 0 0 6px;
+  font-size: 13.5px;
+  color: var(--app-text);
+}
+
+.gd-id-tel {
+  display: block;
+  color: var(--gd-gold-dark);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.gd-id-coords {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: var(--app-text);
+
+  span {
+    color: var(--app-text-secondary);
+  }
+}
+
+.gd-id-bouton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  border-radius: 12px;
+  background: var(--gd-black);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+
+  ion-icon {
+    font-size: 18px;
+    color: var(--gd-gold);
+  }
+}
+
+.gd-id-galerie {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+
+  button {
+    padding: 0;
+    border: none;
+    background: none;
+    aspect-ratio: 1;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+    background: var(--app-surface-alt);
+  }
+}
+
+.gd-id-video {
+  width: 100%;
+  max-height: 260px;
+  border-radius: 12px;
+  background: #000000;
+  display: block;
+
+  & + & {
+    margin-top: 10px;
+  }
+}
+
+.gd-id-lecture {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0;
+}
+
+/* ---------- Gestion par le propriétaire ---------- */
+
+.id-gestion {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.id-gestion-aide {
+  margin: 0;
+}
+
+.id-statuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+
+  button {
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1.5px solid var(--app-border);
+    border-radius: 12px;
+    background: var(--app-surface);
+    color: var(--app-text);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.2;
+
+    &.actif {
+      border-color: #0B0B0C;
+      background: #0B0B0C;
+      color: #ffffff;
+    }
+
+    &.actif.inc-resolu {
+      border-color: #16a34a;
+      background: #16a34a;
+    }
+
+    &.actif.inc-nouveau {
+      border-color: #dc2626;
+      background: #dc2626;
+    }
+  }
+}
+
+.id-commentaire {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--app-text);
+  }
+
+  textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--app-border);
+    border-radius: 12px;
+    background: var(--app-surface);
+    color: var(--app-text);
+    font: inherit;
+    font-size: 14px;
+    resize: vertical;
+
+    &:focus {
+      outline: none;
+      border-color: #0B0B0C;
+    }
+  }
+}
+
+.id-erreur {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 600;
+}

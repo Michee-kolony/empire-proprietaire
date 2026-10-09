@@ -1,0 +1,60 @@
+.pf-photo {
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+
+  span {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--gd-gold);
+    color: var(--gd-black);
+    font-size: 14px;
+    border: 2px solid #0B0B0C;
+  }
+
+  &.attente {
+    opacity: 0.6;
+  }
+}
+
+.pf-modifier {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  border: none;
+  background: none;
+  color: var(--gd-gold-dark);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pf-boutons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 6px;
+
+  ion-button {
+    margin: 0;
+  }
+}
+
+.pf-espace {
+  margin-top: 10px;
+}
+
+.pf-deconnexion {
+  --border-color: #e63946;
+  --color: #b3182b;
+  --border-radius: 12px;
+  font-weight: 700;
+  text-transform: none;
+}

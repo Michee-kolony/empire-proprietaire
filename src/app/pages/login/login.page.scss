@@ -1,0 +1,248 @@
+/* =====================================================
+   CONTENT
+===================================================== */
+
+.login-content {
+  --background: #ffffff;
+}
+
+.login-container {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+/* =====================================================
+   BANDEAU NOIR
+===================================================== */
+
+.login-hero {
+  position: relative;
+  flex: 0 0 auto;
+  min-height: 46vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(28px + env(safe-area-inset-top)) 24px 80px;
+  background:
+    url('../../../assets/login/topo.svg') center / cover no-repeat,
+    radial-gradient(circle at 25% 20%, #2a2a2e, transparent 60%),
+    #0B0B0C;
+  overflow: hidden;
+}
+
+.hero-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-img {
+  width: 130px;
+  height: auto;
+  filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.5));
+}
+
+.brand-pill {
+  color: #e5e5e5;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+}
+
+// Vague blanche qui sépare le bandeau du formulaire
+.hero-vague {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  width: 100%;
+  height: 90px;
+
+  path {
+    fill: #ffffff;
+  }
+}
+
+/* =====================================================
+   FORMULAIRE
+===================================================== */
+
+.login-panel {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 28px calc(28px + env(safe-area-inset-bottom));
+  background: #ffffff;
+}
+
+.login-titre {
+  position: relative;
+  align-self: flex-start;
+  margin: 0 0 30px;
+  padding-bottom: 8px;
+  color: #0B0B0C;
+  font-size: 30px;
+  font-weight: 800;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 64%;
+    height: 3px;
+    border-radius: 3px;
+    background: #0B0B0C;
+  }
+}
+
+.login-form {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.champ-label {
+  color: #0B0B0C;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.champ-ligne {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1.5px solid #d4d4d8;
+  transition: border-color 0.2s;
+
+  &:focus-within {
+    border-bottom-color: #0B0B0C;
+  }
+
+  > ion-icon {
+    flex-shrink: 0;
+    font-size: 18px;
+    color: #71717a;
+  }
+
+  ion-input {
+    --color: #0B0B0C;
+    --placeholder-color: #a1a1aa;
+    --placeholder-opacity: 1;
+    --padding-start: 0;
+    --padding-end: 0;
+    min-height: 42px;
+    font-size: 15px;
+  }
+}
+
+.password-toggle {
+  display: flex;
+  flex-shrink: 0;
+  padding: 6px 0 6px 6px;
+  border: none;
+  background: none;
+  color: #a1a1aa;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.btn-login {
+  --background: #0B0B0C;
+  --background-activated: #27272a;
+  --color: #ffffff;
+  --border-radius: 12px;
+  --box-shadow: 0 10px 22px rgba(11, 11, 12, 0.25);
+  margin-top: auto;
+  height: 52px;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.login-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  animation: gd-spin 0.7s linear infinite;
+}
+
+@keyframes gd-spin {
+  to { transform: rotate(360deg); }
+}
+
+.account-note {
+  margin: 0;
+  text-align: center;
+  color: #71717a;
+  font-size: 13px;
+  line-height: 1.5;
+
+  strong {
+    color: #0B0B0C;
+  }
+}
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.gd-toast {
+  position: fixed;
+  top: calc(20px + env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #17171A;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: calc(100% - 32px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+
+  ion-icon:first-child {
+    color: var(--gd-gold);
+    font-size: 18px;
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: #8b8a85;
+    display: flex;
+  }
+}
+
+.gd-toast-error {
+  border-color: rgba(230, 57, 70, 0.5);
+
+  ion-icon:first-child {
+    color: #e63946;
+  }
+}

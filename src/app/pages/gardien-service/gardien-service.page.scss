@@ -1,0 +1,203 @@
+// Styles spécifiques à « Mon service » (le reste vient de src/theme/gardien.scss)
+
+// Espace sous la dernière carte (Prochains services) pour qu'elle ne passe pas sous la barre de navigation
+.gd-sv-page {
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+}
+
+.gd-sv-succes,
+.gd-sv-alerte {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 17px;
+  }
+}
+
+.gd-sv-succes {
+  background: rgba(46, 204, 113, 0.12);
+  color: #15803d;
+}
+
+.gd-sv-alerte {
+  background: rgba(249, 115, 22, 0.12);
+  color: #c2410c;
+}
+
+.gd-sv-encours {
+  border: 2px solid #16a34a;
+
+  h2 {
+    margin: 6px 0 4px;
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--app-text);
+  }
+}
+
+.gd-sv-etiquette {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #16a34a;
+}
+
+.gd-sv-point {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  animation: gd-sv-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes gd-sv-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.gd-sv-propriete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+
+  ion-icon {
+    color: var(--gd-gold-dark);
+  }
+}
+
+.gd-sv-chrono {
+  margin: 12px 0;
+  text-align: center;
+  font-size: 38px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--app-text);
+}
+
+.gd-sv-badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(107, 114, 128, 0.15);
+  color: #4b5563;
+
+  &.retard { background: rgba(249, 115, 22, 0.16); color: #c2410c; }
+  &.horszone { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
+}
+
+.gd-sv-bouton {
+  margin-top: 12px;
+  --border-radius: 14px;
+  height: 52px;
+  font-weight: 700;
+}
+
+.gd-sv-vert {
+  --background: #16a34a;
+  --background-activated: #15803d;
+  --color: #fff;
+}
+
+.gd-sv-prochain-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+
+  strong {
+    font-size: 14.5px;
+    color: var(--app-text);
+  }
+
+  .principal { background: rgba(212, 175, 55, 0.22); color: var(--gd-gold-dark); }
+  .nonclot { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
+  .gd-sv-chip-effectue {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(46, 204, 113, 0.12);
+    color: #15803d;
+  }
+}
+
+// Service déjà pointé : affiché jusqu'à sa fin prévue, en retrait
+.gd-sv-effectue {
+  opacity: 0.75;
+}
+
+.gd-sv-capital {
+  text-transform: capitalize;
+}
+
+.gd-sv-photo {
+  display: block;
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  background: var(--app-surface-alt);
+}
+
+.gd-sk-photo {
+  width: 100%;
+  height: 150px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.gd-sv-horszone {
+  margin-top: 10px;
+}
+
+.gd-sv-suivi {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 12px 0 0;
+
+  ion-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--gd-gold-dark);
+  }
+}
+
+.gd-sv-note {
+  margin: 10px 0 0;
+  text-align: center;
+}
+
+.gd-sv-etoile {
+  margin-left: 4px;
+  color: var(--gd-gold);
+  vertical-align: -2px;
+}
+
+.gd-sv-rapport {
+  margin-top: 14px;
+}
+
+.gd-sv-incident {
+  min-height: 56px;
+  font-size: 16px;
+}

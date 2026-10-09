@@ -1,0 +1,103 @@
+<app-shell title="Mon profil" subtitle="Compte propriétaire">
+
+  <div class="gd-page" *ngIf="proprietaire$ | async as p">
+
+    <!-- Identité -->
+    <div class="gd-card gd-profile-card">
+      <label class="pf-photo" [class.attente]="enregistrement">
+        <img *ngIf="photoUrl; else photoActuelle" [src]="photoUrl" alt="Nouvelle photo" class="gd-avatar gd-avatar-lg">
+        <ng-template #photoActuelle>
+          <img [gdImage]="p.photo" gdRepli="avatar" alt="Votre photo" class="gd-avatar gd-avatar-lg">
+        </ng-template>
+        <span><ion-icon name="camera"></ion-icon></span>
+        <input type="file" accept="image/jpeg,image/png,image/webp,image/avif" (change)="onPhoto($event)" [disabled]="enregistrement" hidden>
+      </label>
+      <div class="gd-profile-info">
+        <h2>{{ nomComplet(p) || p.nom }}</h2>
+        <span class="gd-matricule"><ion-icon name="call-outline"></ion-icon> {{ p.telephone }}</span>
+        <span class="gd-status-pill active"><ion-icon name="ellipse"></ion-icon> {{ role(p) }}</span>
+      </div>
+    </div>
+
+    <p class="pr-succes" *ngIf="succes"><ion-icon name="checkmark-circle"></ion-icon> {{ succes }}</p>
+    <p class="gd-error" *ngIf="erreur && !edition">{{ erreur }}</p>
+
+    <!-- Informations -->
+    <div class="gd-card" *ngIf="!edition">
+      <h3 class="gd-card-title">
+        <ion-icon name="person-outline"></ion-icon> Informations
+        <button type="button" class="pf-modifier" (click)="modifier()"><ion-icon name="create-outline"></ion-icon> Modifier</button>
+      </h3>
+      <div class="gd-info-row"><span class="gd-label">Nom</span><span class="gd-value">{{ p.nom }}</span></div>
+      <div class="gd-info-row" *ngIf="p.postnom"><span class="gd-label">Postnom</span><span class="gd-value">{{ p.postnom }}</span></div>
+      <div class="gd-info-row" *ngIf="p.prenom"><span class="gd-label">Prénom</span><span class="gd-value">{{ p.prenom }}</span></div>
+      <div class="gd-info-row" *ngIf="p.sexe"><span class="gd-label">Sexe</span><span class="gd-value">{{ p.sexe === 'M' ? 'Homme' : 'Femme' }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Téléphone</span><span class="gd-value">{{ p.telephone }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Email</span><span class="gd-value">{{ p.email || '—' }}</span></div>
+      <div class="gd-info-row" *ngIf="p.profession"><span class="gd-label">Profession</span><span class="gd-value">{{ p.profession }}</span></div>
+      <div class="gd-info-row" *ngIf="p.adresse"><span class="gd-label">Adresse</span><span class="gd-value">{{ p.adresse }}</span></div>
+      <div class="gd-info-row" *ngIf="p.dateInscription"><span class="gd-label">Membre depuis</span><span class="gd-value">{{ date(p.dateInscription) }}</span></div>
+    </div>
+
+    <!-- Modification -->
+    <form class="gd-card" *ngIf="edition" (ngSubmit)="enregistrer()">
+      <h3 class="gd-card-title"><ion-icon name="create-outline"></ion-icon> Modifier mes informations</h3>
+
+      <ion-input class="pr-champ" fill="solid" label="Nom *" labelPlacement="stacked" name="nom" [(ngModel)]="champs.nom" [disabled]="enregistrement"></ion-input>
+      <div class="pr-grille-2">
+        <ion-input class="pr-champ" fill="solid" label="Postnom" labelPlacement="stacked" name="postnom" [(ngModel)]="champs.postnom" [disabled]="enregistrement"></ion-input>
+        <ion-input class="pr-champ" fill="solid" label="Prénom" labelPlacement="stacked" name="prenom" [(ngModel)]="champs.prenom" [disabled]="enregistrement"></ion-input>
+      </div>
+      <ion-select class="pr-champ" fill="solid" label="Sexe" labelPlacement="stacked" interface="action-sheet" cancelText="Annuler"
+        name="sexe" [(ngModel)]="champs.sexe" [disabled]="enregistrement">
+        <ion-select-option value="">Non précisé</ion-select-option>
+        <ion-select-option value="M">Homme</ion-select-option>
+        <ion-select-option value="F">Femme</ion-select-option>
+      </ion-select>
+      <ion-input class="pr-champ" fill="solid" label="Téléphone *" labelPlacement="stacked" type="tel" inputmode="tel" name="telephone"
+        [(ngModel)]="champs.telephone" [disabled]="enregistrement"></ion-input>
+      <ion-input class="pr-champ" fill="solid" label="Email" labelPlacement="stacked" type="email" inputmode="email" name="email"
+        [(ngModel)]="champs.email" [disabled]="enregistrement"></ion-input>
+      <ion-input class="pr-champ" fill="solid" label="Profession" labelPlacement="stacked" name="profession" [(ngModel)]="champs.profession" [disabled]="enregistrement"></ion-input>
+      <ion-input class="pr-champ" fill="solid" label="Adresse" labelPlacement="stacked" name="adresse" [(ngModel)]="champs.adresse" [disabled]="enregistrement"></ion-input>
+
+      <p class="gd-hint" *ngIf="photo">La nouvelle photo sera enregistrée avec vos informations.</p>
+      <p class="gd-error" *ngIf="erreur">{{ erreur }}</p>
+
+      <div class="pf-boutons">
+        <ion-button fill="outline" class="btn-outline-gold" (click)="annuler()" [disabled]="enregistrement">Annuler</ion-button>
+        <ion-button type="submit" class="btn-gold" [disabled]="enregistrement">
+          <ion-spinner name="crescent" slot="start" *ngIf="enregistrement"></ion-spinner>
+          Enregistrer
+        </ion-button>
+      </div>
+    </form>
+
+    <!-- Mot de passe -->
+    <form class="gd-card" (ngSubmit)="changerMotDePasse()">
+      <h3 class="gd-card-title"><ion-icon name="lock-closed-outline"></ion-icon> Mot de passe</h3>
+      <ion-input class="pr-champ" fill="solid" [label]="'Nouveau mot de passe (' + motDePasseMin + ' caractères min.)'" labelPlacement="stacked"
+        [type]="afficherMotDePasse ? 'text' : 'password'" autocomplete="new-password" name="motDePasse" [(ngModel)]="motDePasse" [disabled]="enregistrementMotDePasse">
+        <ion-button fill="clear" slot="end" (click)="afficherMotDePasse = !afficherMotDePasse" aria-label="Afficher le mot de passe">
+          <ion-icon slot="icon-only" [name]="afficherMotDePasse ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </ion-button>
+      </ion-input>
+      <ion-input class="pr-champ" fill="solid" label="Confirmer le mot de passe" labelPlacement="stacked"
+        [type]="afficherMotDePasse ? 'text' : 'password'" autocomplete="new-password" name="confirmation" [(ngModel)]="confirmation" [disabled]="enregistrementMotDePasse"></ion-input>
+      <p class="gd-error" *ngIf="erreurMotDePasse">{{ erreurMotDePasse }}</p>
+      <p class="pr-succes pf-espace" *ngIf="succesMotDePasse"><ion-icon name="checkmark-circle"></ion-icon> {{ succesMotDePasse }}</p>
+      <ion-button type="submit" expand="block" class="btn-dark pf-espace" [disabled]="enregistrementMotDePasse || !motDePasse">
+        <ion-spinner name="crescent" slot="start" *ngIf="enregistrementMotDePasse"></ion-spinner>
+        Changer le mot de passe
+      </ion-button>
+    </form>
+
+    <ion-button expand="block" fill="outline" class="pf-deconnexion" (click)="deconnexion()">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Se déconnecter
+    </ion-button>
+
+    <p class="gd-app-version">Empire Security · Espace propriétaire</p>
+  </div>
+
+</app-shell>

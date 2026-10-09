@@ -1,0 +1,226 @@
+<app-shell title="Propriété" [subtitle]="propriete?.nomReference || ''" retour="/proprietaire/proprietes">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <p class="pr-succes" *ngIf="messageSucces"><ion-icon name="checkmark-circle"></ion-icon> {{ messageSucces }}</p>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !propriete">
+      <ion-skeleton-text [animated]="true" style="width: 100%; height: 200px; border-radius: 16px"></ion-skeleton-text>
+      <div class="gd-card">
+        <ion-skeleton-text [animated]="true" style="width: 60%; height: 20px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 85%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="propriete as p">
+
+      <!-- Photos -->
+      <div class="pd-galerie" *ngIf="p.photos.length; else sansPhoto">
+        <button type="button" *ngFor="let photo of p.photos; let n = index" (click)="photoOuverte = photo">
+          <img [src]="photo" [alt]="'Photo ' + (n + 1) + ' de la propriété'" loading="lazy">
+        </button>
+      </div>
+      <ng-template #sansPhoto>
+        <img class="pd-photo-vide" src="assets/gardien/propriete.svg" alt="">
+      </ng-template>
+
+      <!-- En-tête -->
+      <div class="gd-card">
+        <div class="pd-tete">
+          <div>
+            <span class="pd-type"><ion-icon [name]="iconeType(p.typePropriete)"></ion-icon> {{ libelleType(p) }}</span>
+            <h2>{{ p.nomReference }}</h2>
+            <p><ion-icon name="location-outline"></ion-icon> {{ adresse(p) }}</p>
+            <p *ngIf="p.referenceComplementaire" class="pd-ref">{{ p.referenceComplementaire }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Abonnement -->
+      <a class="gd-card pd-abonnement" [ngClass]="abonnement.classe" routerLink="/proprietaire/abonnements">
+        <ion-icon name="card-outline"></ion-icon>
+        <div>
+          <strong>{{ abonnement.titre }}</strong>
+          <span>{{ abonnement.detail }}</span>
+        </div>
+        <ion-icon name="chevron-forward" class="pr-fleche"></ion-icon>
+      </a>
+
+      <!-- Discussion de la propriété -->
+      <button type="button" class="gd-card pd-discussion" (click)="discussion()" [disabled]="ouvertureChat">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <div>
+          <strong>Discussion de la propriété</strong>
+          <span>Vous, vos gardiens et l'administration</span>
+        </div>
+        <ion-spinner name="crescent" *ngIf="ouvertureChat"></ion-spinner>
+        <ion-icon name="chevron-forward" class="pr-fleche" *ngIf="!ouvertureChat"></ion-icon>
+      </button>
+
+      <!-- Carte -->
+      <div class="gd-card">
+        <h3 class="gd-card-title">
+          <ion-icon name="map-outline"></ion-icon> Gardiens sur la carte
+          <a class="pd-lien" *ngIf="aPosition" routerLink="/proprietaire/carte" [queryParams]="{ propriete: p._id }">Plein écran</a>
+        </h3>
+        <ng-container *ngIf="aPosition; else carteSansPosition">
+          <app-carte-gardiens
+            hauteur="240px"
+            [proprietes]="proprieteCarte"
+            [gardiens]="gardiensCarte"
+            [incidents]="incidentsCarte"
+            (incidentClique)="ouvrirIncident($event)"
+            (gardienClique)="ouvrirGardienSurCarte($event)"
+          ></app-carte-gardiens>
+          <div class="pr-carte-legende pd-legende">
+            <span><i class="prop"></i> Propriété (zone 200 m)</span>
+            <span><i class="on"></i> En service</span>
+            <span><i class="hors"></i> En service, hors zone</span>
+            <span><i class="incident"></i> Incident en cours</span>
+          </div>
+        </ng-container>
+        <ng-template #carteSansPosition>
+          <div class="pr-alerte">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>Cette propriété n'est pas encore placée sur la carte. Contactez Empire Security pour indiquer sa position.</span>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Gardiens -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="people-outline"></ion-icon> Gardiens</h3>
+        <ion-segment [value]="onglet" (ionChange)="onOnglet($any($event))" class="pd-segment">
+          <ion-segment-button value="en cours"><ion-label>En poste ({{ compte('en cours') }})</ion-label></ion-segment-button>
+          <ion-segment-button value="a venir"><ion-label>À venir ({{ compte('a venir') }})</ion-label></ion-segment-button>
+          <ion-segment-button value="historique"><ion-label>Historique</ion-label></ion-segment-button>
+        </ion-segment>
+
+        <p class="gd-hint pd-vide" *ngIf="gardiensOnglet.length === 0">
+          <ng-container *ngIf="onglet === 'en cours'">Aucun gardien n'est affecté à cette propriété en ce moment.</ng-container>
+          <ng-container *ngIf="onglet === 'a venir'">Aucune affectation prévue.</ng-container>
+          <ng-container *ngIf="onglet === 'historique'">Aucun gardien n'a encore terminé d'affectation ici.</ng-container>
+        </p>
+
+        <div class="pd-gardien" *ngFor="let a of gardiensOnglet">
+          <a class="pr-lien-carte" [routerLink]="['/proprietaire/gardiens', g._id]" *ngIf="a.gardien as g">
+            <img [gdImage]="g.photoProfil" gdRepli="avatar" alt="" class="pr-avatar">
+            <div class="pr-corps">
+              <strong>{{ nomComplet(g) }}</strong>
+              <div class="pr-badges">
+                <span class="pr-role" [class.remplacant]="a.role === 'remplacant'">{{ a.role === 'principal' ? 'Principal' : 'Remplaçant' }}</span>
+                <span class="pr-service" *ngIf="a.statut === 'en cours'" [class.on]="g.statut === 'en service'">
+                  <ion-icon name="ellipse"></ion-icon> {{ g.statut === 'en service' ? 'En service' : 'Hors service' }}
+                </span>
+              </div>
+              <span class="pr-meta"><ion-icon name="time-outline"></ion-icon> {{ horaire(a) }} · {{ jours(a.joursService) }}</span>
+              <span class="pr-meta"><ion-icon name="calendar-outline"></ion-icon> Du {{ date(a.dateDebut) }} au {{ date(a.retireLe || a.dateFin) }}</span>
+              <span class="pr-meta" *ngIf="a.statut === 'en cours' && poste(g._id)?.gardien?.coordonnees?.lat != null">
+                <ion-icon name="navigate-outline"></ion-icon> Position {{ depuis(poste(g._id)?.gardien?.updatedAt) }}
+              </span>
+              <span class="pr-meta" *ngIf="a.motifRetrait"><ion-icon name="information-circle-outline"></ion-icon> {{ a.motifRetrait }}</span>
+            </div>
+          </a>
+          <div class="pr-actions" *ngIf="a.statut !== 'expiree' && a.gardien?.telephonePrincipal">
+            <a class="pr-action appel" [href]="lienTel(a.gardien?.telephonePrincipal)" aria-label="Appeler">
+              <ion-icon name="call"></ion-icon>
+            </a>
+          </div>
+        </div>
+        <p class="gd-hint pd-note">Les gardiens sont affectés par Empire Security.</p>
+      </div>
+
+      <!-- Sécurité -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="shield-checkmark-outline"></ion-icon> Sécurité</h3>
+        <div class="gd-info-row"><span class="gd-label">Niveau</span><span class="gd-value">{{ niveauSecurite }}</span></div>
+        <div class="pd-equipements">
+          <span *ngFor="let e of equipements" [class.actif]="e.actif">
+            <ion-icon [name]="e.actif ? 'checkmark-circle' : 'close-circle-outline'"></ion-icon>
+            {{ e.libelle }}
+          </span>
+        </div>
+        <p class="pd-texte" *ngIf="p.autresEquipementsSecurite">{{ p.autresEquipementsSecurite }}</p>
+      </div>
+
+      <!-- Caractéristiques -->
+      <div class="gd-card" *ngIf="caracteristiques.length || p.autresInformations">
+        <h3 class="gd-card-title"><ion-icon name="information-circle-outline"></ion-icon> Caractéristiques</h3>
+        <div class="gd-info-row" *ngFor="let c of caracteristiques">
+          <span class="gd-label">{{ c.libelle }}</span><span class="gd-value">{{ c.valeur }}</span>
+        </div>
+        <p class="pd-texte" *ngIf="p.autresInformations">{{ p.autresInformations }}</p>
+      </div>
+
+      <!-- Documents -->
+      <div class="gd-card" *ngIf="p.documentPropriete || p.autresDocuments.length">
+        <h3 class="gd-card-title"><ion-icon name="document-text-outline"></ion-icon> Documents</h3>
+        <a class="pd-document" *ngIf="p.documentPropriete" [href]="p.documentPropriete" target="_blank" rel="noopener">
+          <ion-icon [name]="estPdf(p.documentPropriete) ? 'document-outline' : 'image-outline'"></ion-icon>
+          <span>Document de propriété</span>
+          <ion-icon name="open-outline" class="pr-fleche"></ion-icon>
+        </a>
+        <a class="pd-document" *ngFor="let d of p.autresDocuments; let n = index" [href]="d" target="_blank" rel="noopener">
+          <ion-icon [name]="estPdf(d) ? 'document-outline' : 'image-outline'"></ion-icon>
+          <span>Document {{ n + 1 }}</span>
+          <ion-icon name="open-outline" class="pr-fleche"></ion-icon>
+        </a>
+      </div>
+
+      <!-- Incidents -->
+      <div class="gd-card">
+        <h3 class="gd-card-title">
+          <ion-icon name="warning-outline"></ion-icon> Incidents ({{ incidents.length }})
+          <a class="pd-lien" *ngIf="incidents.length > 3" routerLink="/proprietaire/incidents" [queryParams]="{ propriete: p._id }">Tout voir</a>
+        </h3>
+        <p class="gd-hint pd-vide" *ngIf="incidents.length === 0">Aucun incident signalé sur cette propriété.</p>
+        <a class="pd-incident" *ngFor="let i of incidents.slice(0, 3)" [routerLink]="['/proprietaire/incidents', i._id]">
+          <ion-icon [name]="iconeIncident(i.type)"></ion-icon>
+          <div class="pr-corps">
+            <strong>{{ i.typeLibelle }}</strong>
+            <span class="pr-meta">{{ dateHeure(i.dateIncident) }}</span>
+          </div>
+          <span class="gd-status-chip" [ngClass]="'inc-' + i.statut">{{ i.statutLibelle }}</span>
+        </a>
+      </div>
+
+      <!-- Rapports des gardiens -->
+      <div class="gd-card">
+        <h3 class="gd-card-title">
+          <ion-icon name="document-text-outline"></ion-icon> Rapports des gardiens ({{ rapports.length }})
+          <a class="pd-lien" *ngIf="rapports.length" routerLink="/proprietaire/rapports" [queryParams]="{ propriete: p._id }">Tout voir</a>
+        </h3>
+        <p class="gd-hint pd-vide" *ngIf="rapports.length === 0">Aucun rapport de gardien pour cette propriété.</p>
+        <a class="pd-incident" *ngFor="let r of rapports.slice(0, 3)" routerLink="/proprietaire/rapports" [queryParams]="{ propriete: p._id }">
+          <ion-icon [name]="iconeRapport(r.objet)"></ion-icon>
+          <div class="pr-corps">
+            <strong>{{ r.objetLibelle }} · {{ nomComplet(r.gardien) }}</strong>
+            <span class="pr-meta pd-rapport-texte">{{ dateHeure(r.createdAt) }} — {{ r.description }}</span>
+          </div>
+        </a>
+      </div>
+
+    </ng-container>
+  </div>
+
+  <div class="gd-photo-viewer" *ngIf="photoOuverte" (click)="photoOuverte = null">
+    <img [src]="photoOuverte" alt="Photo de la propriété">
+    <button type="button" aria-label="Fermer"><ion-icon name="close-circle"></ion-icon></button>
+  </div>
+
+</app-shell>

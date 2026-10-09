@@ -1,0 +1,113 @@
+@use "theme/gardien.scss";
+@use "theme/proprietaire.scss";
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+
+/* Core CSS required for Ionic components to work properly */
+@import "@ionic/angular/css/core.css";
+
+/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/normalize.css";
+@import "@ionic/angular/css/structure.css";
+@import "@ionic/angular/css/typography.css";
+@import "@ionic/angular/css/display.css";
+
+/* Optional CSS utils that can be commented out */
+@import "@ionic/angular/css/padding.css";
+@import "@ionic/angular/css/float-elements.css";
+@import "@ionic/angular/css/text-alignment.css";
+@import "@ionic/angular/css/text-transformation.css";
+@import "@ionic/angular/css/flex-utils.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ion-font-family: 'Roboto', sans-serif;
+
+  // =====================================================
+  // GARDIEN — Identité visuelle : jaune doré / noir / blanc
+  // =====================================================
+  --gd-gold: #D4AF37;
+  --gd-gold-light: #F2CD5C;
+  --gd-gold-dark: #A8841F;
+  --gd-black: #0B0B0C;
+  --gd-charcoal: #1C1C1E;
+
+  --app-bg: #F7F6F2;            // blanc cassé, jamais de blanc pur en fond
+  --app-surface: #ffffff;       // cartes / surfaces surélevées
+  --app-surface-alt: #F2EFE4;   // surfaces secondaires teintées or / hover
+  --app-text: #111111;
+  --app-text-secondary: #6b6b6b;
+  --app-border: #E7E2D2;
+
+  // Alignement des couleurs Ionic sur l'identité or / noir
+  --ion-color-primary: #D4AF37;
+  --ion-color-primary-rgb: 212, 175, 55;
+  --ion-color-primary-contrast: #0B0B0C;
+  --ion-color-primary-contrast-rgb: 11, 11, 12;
+  --ion-color-primary-shade: #A8841F;
+  --ion-color-primary-tint: #F2CD5C;
+
+  --ion-color-dark: #0B0B0C;
+  --ion-color-dark-rgb: 11, 11, 12;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #000000;
+  --ion-color-dark-tint: #1C1C1E;
+
+  --ion-background-color: var(--app-bg);
+  --ion-text-color: var(--app-text);
+  --ion-toolbar-background: var(--gd-black);
+  --ion-toolbar-color: #ffffff;
+  --ion-tab-bar-background: #ffffff;
+}
+
+html,
+body,
+ion-app,
+ion-content,
+ion-button,
+ion-input,
+ion-textarea,
+ion-select {
+  font-family: 'Roboto', sans-serif;
+}
+
+
+/* GARDIEN — Scrollbars invisibles */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+ion-content::part(scroll) {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+ion-content::part(scroll)::-webkit-scrollbar {
+  display: none;
+}
+
+/* Surface commune des pages internes de l'application. */
+ion-content {
+  --background: var(--app-bg);
+}
+
+app-login ion-content {
+  --background: initial;
+}
+
+/* Couleur de fond/texte par défaut du body (évite tout flash blanc) */
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+}

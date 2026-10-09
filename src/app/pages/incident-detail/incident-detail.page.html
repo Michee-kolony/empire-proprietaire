@@ -1,0 +1,161 @@
+<app-shell title="Incident" [subtitle]="incident?.typeLibelle || ''" retour="/proprietaire/incidents">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <p class="gd-id-succes" *ngIf="messageSucces"><ion-icon name="checkmark-circle"></ion-icon> {{ messageSucces }}</p>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !incident">
+      <div class="gd-card">
+        <ion-skeleton-text [animated]="true" style="width: 60%; height: 20px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 60px"></ion-skeleton-text>
+      </div>
+      <div class="gd-card">
+        <ion-skeleton-text [animated]="true" style="width: 50%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 85%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="incident as i">
+
+      <!-- En-tête -->
+      <div class="gd-card">
+        <div class="gd-id-tete">
+          <div class="gd-id-icone"><ion-icon [name]="icone(i.type)"></ion-icon></div>
+          <div>
+            <h2>{{ i.typeLibelle || i.type }}</h2>
+            <div class="gd-id-badges">
+              <span class="gd-urgence-badge" [ngClass]="i.gravite">{{ i.graviteLibelle || i.gravite }}</span>
+              <span class="gd-status-chip" [ngClass]="'inc-' + i.statut">{{ i.statutLibelle || i.statut }}</span>
+            </div>
+          </div>
+        </div>
+
+        <p class="gd-id-description">{{ i.description }}</p>
+
+        <div class="gd-info-row"><span class="gd-label">Survenu le</span><span class="gd-value">{{ dateHeure(i.dateIncident) }}</span></div>
+        <div class="gd-info-row"><span class="gd-label">Signalé le</span><span class="gd-value">{{ dateHeure(i.createdAt) }}</span></div>
+        <div class="gd-info-row"><span class="gd-label">Signalé par</span><span class="gd-value">{{ signalePar }}</span></div>
+        <div class="gd-info-row" *ngIf="i.gardien && i.signaleParModele !== 'Gardien'">
+          <span class="gd-label">Gardien concerné</span>
+          <span class="gd-value"><a class="gd-id-tel" [routerLink]="['/proprietaire/gardiens', i.gardien._id]">{{ nomComplet(i.gardien) }}</a></span>
+        </div>
+      </div>
+
+      <!-- Suivi par l'entreprise -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="git-commit-outline"></ion-icon> Suivi</h3>
+        <div class="gd-info-row">
+          <span class="gd-label">Statut</span>
+          <span class="gd-value"><span class="gd-status-chip" [ngClass]="'inc-' + i.statut">{{ i.statutLibelle || i.statut }}</span></span>
+        </div>
+        <div class="gd-info-row" *ngIf="i.traiteLe"><span class="gd-label">Traité le</span><span class="gd-value">{{ dateHeure(i.traiteLe) }}</span></div>
+        <div class="gd-info-row" *ngIf="traitePar"><span class="gd-label">Traité par</span><span class="gd-value">{{ traitePar }}</span></div>
+
+        <div class="gd-id-reponse" *ngIf="i.commentaireAdmin">
+          <strong><ion-icon name="chatbubble-ellipses-outline"></ion-icon> Réponse de l'entreprise</strong>
+          <p>{{ i.commentaireAdmin }}</p>
+        </div>
+        <p class="gd-hint gd-id-attente" *ngIf="!i.commentaireAdmin && !i.traiteLe">L'entreprise n'a pas encore répondu.</p>
+      </div>
+
+      <!-- Gestion par le propriétaire -->
+      <div class="gd-card id-gestion">
+        <h3 class="gd-card-title"><ion-icon name="construct-outline"></ion-icon> Gérer l'incident</h3>
+        <p class="gd-hint id-gestion-aide">
+          Vous pouvez suivre cet incident vous-même : marquez-le « Résolu » une fois réglé, l'alarme s'arrête aussitôt.
+        </p>
+
+        <div class="id-statuts">
+          <button type="button" *ngFor="let s of statuts" [ngClass]="'inc-' + s.valeur"
+            [class.actif]="statutChoisi === s.valeur" [disabled]="enregistrement" (click)="statutChoisi = s.valeur">
+            {{ s.libelle }}
+          </button>
+        </div>
+
+        <label class="id-commentaire">
+          <span>Commentaire (facultatif)</span>
+          <textarea rows="3" [(ngModel)]="commentaire" [maxlength]="commentaireMax" [disabled]="enregistrement"
+            placeholder="Ex. : la police est passée, la porte a été réparée…"></textarea>
+        </label>
+
+        <p class="id-erreur" *ngIf="erreurGestion"><ion-icon name="alert-circle-outline"></ion-icon> {{ erreurGestion }}</p>
+
+        <ion-button expand="block" class="btn-gold" [disabled]="!modifie || enregistrement" (click)="enregistrer()">
+          <ion-spinner name="crescent" *ngIf="enregistrement" slot="start"></ion-spinner>
+          <ion-icon name="checkmark-outline" *ngIf="!enregistrement" slot="start"></ion-icon>
+          Enregistrer
+        </ion-button>
+      </div>
+
+      <!-- Propriété -->
+      <a class="gd-card pr-lien-carte" *ngIf="i.propriete as p" [routerLink]="['/proprietaire/proprietes', p._id]">
+        <img [gdImage]="p.photos?.[0]" gdRepli="propriete" alt="" class="pr-vignette">
+        <div class="pr-corps">
+          <strong>{{ p.nomReference }}</strong>
+          <span class="pr-meta"><ion-icon name="location-outline"></ion-icon> {{ adresse(p) }}</span>
+        </div>
+        <ion-icon name="chevron-forward" class="pr-fleche"></ion-icon>
+      </a>
+
+      <!-- Position -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="location-outline"></ion-icon> Position</h3>
+        <ng-container *ngIf="lienCarte; else sansPosition">
+          <p class="gd-id-coords">
+            {{ i.position?.lat | number:'1.5-5' }}, {{ i.position?.lng | number:'1.5-5' }}
+            <span *ngIf="i.position?.precision">(± {{ i.position?.precision }} m)</span>
+          </p>
+          <a class="gd-id-bouton" [href]="lienCarte" target="_blank" rel="noopener">
+            <ion-icon name="map-outline"></ion-icon>
+            Ouvrir dans Maps
+          </a>
+        </ng-container>
+        <ng-template #sansPosition><p class="gd-hint gd-id-attente">Aucune position GPS jointe.</p></ng-template>
+      </div>
+
+      <!-- Photos -->
+      <div class="gd-card" *ngIf="i.photos.length">
+        <h3 class="gd-card-title"><ion-icon name="images-outline"></ion-icon> Photos ({{ i.photos.length }})</h3>
+        <div class="gd-id-galerie">
+          <button type="button" *ngFor="let photo of i.photos; let n = index" (click)="photoOuverte = photo">
+            <img [src]="photo" [alt]="'Photo ' + (n + 1) + ' de l\'incident'" loading="lazy">
+          </button>
+        </div>
+      </div>
+
+      <!-- Vidéos -->
+      <div class="gd-card" *ngIf="i.videos.length">
+        <h3 class="gd-card-title"><ion-icon name="videocam-outline"></ion-icon> Vidéos ({{ i.videos.length }})</h3>
+        <video class="gd-id-video" *ngFor="let video of i.videos" [src]="video" controls playsinline preload="metadata"></video>
+      </div>
+
+      <p class="gd-hint gd-id-lecture">
+        <ion-icon name="shield-checkmark-outline"></ion-icon>
+        Empire Security est informée de chaque changement.
+      </p>
+
+    </ng-container>
+  </div>
+
+  <div class="gd-photo-viewer" *ngIf="photoOuverte" (click)="photoOuverte = null">
+    <img [src]="photoOuverte" alt="Photo de l'incident">
+    <button type="button" aria-label="Fermer"><ion-icon name="close-circle"></ion-icon></button>
+  </div>
+
+</app-shell>

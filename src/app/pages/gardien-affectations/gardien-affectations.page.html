@@ -1,0 +1,101 @@
+<app-gardien-shell title="Mes affectations" subtitle="Propriétés et périodes de service">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <ion-segment [value]="filtre" (ionChange)="changerFiltre($any($event))" class="gd-aff-segment">
+      <ion-segment-button value="en cours"><ion-label>En cours</ion-label></ion-segment-button>
+      <ion-segment-button value="a venir"><ion-label>À venir</ion-label></ion-segment-button>
+      <ion-segment-button value="expiree"><ion-label>Historique</ion-label></ion-segment-button>
+    </ion-segment>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && affectations.length === 0">
+      <div class="gd-card" *ngFor="let i of [1, 2]">
+        <div class="gd-aff-top">
+          <ion-skeleton-text [animated]="true" class="gd-aff-photo"></ion-skeleton-text>
+          <div style="flex: 1">
+            <ion-skeleton-text [animated]="true" style="width: 60%; height: 18px"></ion-skeleton-text>
+            <ion-skeleton-text [animated]="true" style="width: 85%"></ion-skeleton-text>
+          </div>
+        </div>
+        <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 70%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <div class="gd-empty" *ngIf="!isLoading && !errorMessage && affectations.length === 0">
+      <ion-icon name="business-outline"></ion-icon>
+      <span>{{ messageVide }}</span>
+    </div>
+
+    <a
+      class="gd-card gd-aff-card"
+      *ngFor="let affectation of affectations"
+      [class.gd-aff-active]="affectation.statut === 'en cours'"
+      [routerLink]="['/gardien/affectations', affectation._id]"
+    >
+      <div class="gd-aff-top">
+        <img class="gd-aff-photo" [gdImage]="affectation.propriete?.photos?.[0]" gdRepli="propriete" [alt]="affectation.propriete?.nomReference || 'Propriété'" loading="lazy">
+
+        <div class="gd-aff-info">
+          <h3>{{ affectation.propriete?.nomReference || 'Propriété supprimée' }}</h3>
+          <span class="gd-aff-adresse" *ngIf="adresse(affectation.propriete)">
+            <ion-icon name="location-outline"></ion-icon> {{ adresse(affectation.propriete) }}
+          </span>
+          <div class="gd-aff-chips">
+            <span class="gd-status-chip" [ngClass]="statutClasse(affectation.statut)">{{ statutLabel(affectation.statut) }}</span>
+            <span class="gd-status-chip" [class.principal]="affectation.role === 'principal'">
+              {{ affectation.role === 'principal' ? 'Principal' : 'Remplaçant' }}
+              <ion-icon name="star" *ngIf="affectation.role === 'principal'"></ion-icon>
+            </span>
+          </div>
+        </div>
+        <ion-icon name="chevron-forward" class="gd-aff-chevron"></ion-icon>
+      </div>
+
+      <div class="gd-info-row">
+        <span class="gd-label">Horaire</span>
+        <span class="gd-value">
+          <ion-icon name="moon-outline" *ngIf="finLendemain(affectation)"></ion-icon>
+          {{ horaire(affectation) }}<span *ngIf="finLendemain(affectation)" class="gd-aff-lendemain"> lendemain</span>
+        </span>
+      </div>
+      <div class="gd-info-row">
+        <span class="gd-label">Jours</span>
+        <span class="gd-value" *ngIf="tousLesJours(affectation)">Tous les jours</span>
+        <span class="gd-value gd-aff-jours" *ngIf="!tousLesJours(affectation)">
+          <span *ngFor="let jour of semaine" [class.actif]="jourActif(affectation, jour)" [title]="jour">{{ initiales[jour] }}</span>
+        </span>
+      </div>
+      <div class="gd-info-row">
+        <span class="gd-label">Période</span>
+        <span class="gd-value">du {{ date(affectation.dateDebut) }} au {{ date(affectation.dateFin) }}</span>
+      </div>
+
+      <div class="gd-aff-retrait" *ngIf="affectation.retireLe">
+        <ion-icon name="log-out-outline"></ion-icon>
+        <span>Retiré le {{ date(affectation.retireLe) }}<ng-container *ngIf="affectation.motifRetrait"> — {{ affectation.motifRetrait }}</ng-container></span>
+      </div>
+      <div class="gd-aff-retrait" *ngIf="affectation.remplacePar?.gardien as g">
+        <ion-icon name="swap-horizontal-outline"></ion-icon>
+        <span>Remplacé par {{ nomComplet(g) }}</span>
+      </div>
+    </a>
+
+  </div>
+
+</app-gardien-shell>

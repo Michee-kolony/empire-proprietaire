@@ -1,0 +1,143 @@
+<app-shell title="Gardien" [subtitle]="gardien ? nomComplet(gardien) : ''" retour="/proprietaire/carte">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !gardien">
+      <div class="gd-card">
+        <ion-skeleton-text [animated]="true" style="width: 60%; height: 20px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 40%"></ion-skeleton-text>
+      </div>
+      <ion-skeleton-text [animated]="true" style="width: 100%; height: 200px; border-radius: 16px"></ion-skeleton-text>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="gardien as g">
+
+      <!-- Identité -->
+      <div class="gd-card gd-profile-card">
+        <img [gdImage]="g.photoProfil" gdRepli="avatar" alt="Photo du gardien" class="gd-avatar gd-avatar-lg">
+        <div class="gd-profile-info">
+          <h2>{{ nomComplet(g) }}</h2>
+          <span class="gd-matricule"><ion-icon name="id-card-outline"></ion-icon> {{ g.matricule }}</span>
+          <span class="gd-status-pill" [class.active]="g.statut === 'en service'">
+            <ion-icon name="ellipse"></ion-icon>
+            {{ g.statut === 'en service' ? 'En service' : 'Hors service' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Contacter -->
+      <div class="gdd-contacts" *ngIf="enCours.length">
+        <a class="gdd-contact appel" *ngIf="g.telephonePrincipal" [href]="lienTel(g.telephonePrincipal)">
+          <ion-icon name="call"></ion-icon>
+          <span>Appeler</span>
+        </a>
+        <button type="button" class="gdd-contact" (click)="ecrire()" [disabled]="ouvertureChat">
+          <ion-icon name="chatbubbles"></ion-icon>
+          <span>Message</span>
+        </button>
+        <a class="gdd-contact" *ngIf="g.telephonePrincipal" [href]="lienTel(g.telephonePrincipal).replace('tel:', 'sms:')">
+          <ion-icon name="chatbubble-ellipses"></ion-icon>
+          <span>SMS</span>
+        </a>
+        <a class="gdd-contact" *ngIf="g.telephoneSecondaire" [href]="lienTel(g.telephoneSecondaire)">
+          <ion-icon name="call-outline"></ion-icon>
+          <span>2e numéro</span>
+        </a>
+      </div>
+
+      <!-- Position -->
+      <div class="gd-card" *ngIf="enCours.length">
+        <h3 class="gd-card-title"><ion-icon name="navigate-outline"></ion-icon> Position</h3>
+        <ng-container *ngIf="aPosition; else sansPosition">
+          <app-carte-gardiens hauteur="220px" [proprietes]="proprietesCarte" [gardiens]="gardiensCarte" [selection]="g._id"></app-carte-gardiens>
+          <div class="gd-info-row gdd-espace" *ngIf="distance as d">
+            <span class="gd-label">{{ d.propriete.nomReference }}</span>
+            <span class="gd-value">
+              <span class="pr-abo" [ngClass]="surSite ? 'actif' : 'bientot'">{{ surSite ? 'Sur le site' : 'À ' + distanceLabel(d.metres) }}</span>
+            </span>
+          </div>
+          <div class="gd-info-row"><span class="gd-label">Dernière mise à jour</span><span class="gd-value">{{ depuis(g.updatedAt) }}</span></div>
+        </ng-container>
+        <ng-template #sansPosition>
+          <p class="gd-hint gdd-sans-marge">Position inconnue : elle est envoyée par le téléphone du gardien pendant son service.</p>
+        </ng-template>
+      </div>
+
+      <!-- Affectations chez le propriétaire -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="business-outline"></ion-icon> Sur vos propriétés</h3>
+        <a class="gdd-affectation" *ngFor="let a of enCours" [routerLink]="['/proprietaire/proprietes', a.propriete?._id]">
+          <div class="pr-corps">
+            <strong>{{ a.propriete?.nomReference }}</strong>
+            <div class="pr-badges">
+              <span class="pr-role" [class.remplacant]="a.role === 'remplacant'">{{ a.role === 'principal' ? 'Principal' : 'Remplaçant' }}</span>
+              <span class="pr-abo" [ngClass]="a.statut === 'en cours' ? 'actif' : 'aucun'">{{ a.statut === 'en cours' ? 'En cours' : 'À venir' }}</span>
+            </div>
+            <span class="pr-meta"><ion-icon name="time-outline"></ion-icon> {{ horaire(a) }} · {{ jours(a.joursService) }}</span>
+            <span class="pr-meta"><ion-icon name="calendar-outline"></ion-icon> Du {{ date(a.dateDebut) }} au {{ date(a.dateFin) }}</span>
+          </div>
+          <ion-icon name="chevron-forward" class="pr-fleche"></ion-icon>
+        </a>
+        <ng-container *ngIf="passees.length">
+          <p class="gdd-sous-titre">Affectations terminées</p>
+          <div class="gdd-affectation passee" *ngFor="let a of passees">
+            <div class="pr-corps">
+              <strong>{{ a.propriete?.nomReference }}</strong>
+              <span class="pr-meta"><ion-icon name="calendar-outline"></ion-icon> Du {{ date(a.dateDebut) }} au {{ date(a.retireLe || a.dateFin) }}</span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Avis -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="chatbubbles-outline"></ion-icon> Avis des propriétaires ({{ commentaires.length }})</h3>
+
+        <ion-textarea
+          class="gd-textarea"
+          aria-label="Votre avis"
+          placeholder="Partagez votre avis sur ce gardien (ponctualité, comportement…)"
+          [value]="avis"
+          (ionInput)="onAvis($any($event))"
+          [autoGrow]="true"
+          rows="3"
+          [maxlength]="avisMax"
+          [disabled]="envoiAvis"
+        ></ion-textarea>
+        <p class="gd-error gdd-espace" *ngIf="erreurAvis">{{ erreurAvis }}</p>
+        <p class="pr-succes gdd-espace" *ngIf="succesAvis"><ion-icon name="checkmark-circle"></ion-icon> {{ succesAvis }}</p>
+        <ion-button expand="block" class="btn-dark gdd-espace" (click)="envoyerAvis()" [disabled]="!peutCommenter">
+          <ion-spinner name="crescent" slot="start" *ngIf="envoiAvis"></ion-spinner>
+          <ion-icon name="send" slot="start" *ngIf="!envoiAvis"></ion-icon>
+          Publier mon avis
+        </ion-button>
+
+        <div class="gdd-avis" *ngFor="let c of commentaires">
+          <img [gdImage]="c.photoProprietaire" gdRepli="avatar" alt="">
+          <div>
+            <strong>{{ c.nomProprietaire }}</strong>
+            <span>{{ dateHeure(c.dateAjout) }}</span>
+            <p>{{ c.contenu }}</p>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+
+</app-shell>

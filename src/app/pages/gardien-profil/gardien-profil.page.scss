@@ -1,0 +1,63 @@
+// Styles spécifiques au profil (le reste vient de src/theme/gardien.scss)
+
+.gd-profile-card .gd-status-pill {
+  align-self: flex-start;
+}
+
+.gd-commentaire {
+  display: flex;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--app-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  img {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 13.5px;
+    color: var(--app-text);
+  }
+
+  small {
+    font-size: 11.5px;
+    color: var(--app-text-secondary);
+  }
+
+  p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--app-text);
+  }
+}
+
+.gd-pr-erreur {
+  padding: 12px;
+}
+
+.gd-pr-lien {
+  color: var(--gd-gold-dark);
+  text-decoration: none;
+}
+
+.gd-pr-email {
+  word-break: break-all;
+}
+
+.gd-pr-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin: 0;
+}

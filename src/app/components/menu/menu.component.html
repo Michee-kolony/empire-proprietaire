@@ -1,0 +1,51 @@
+<ion-content class="gd-mn-content">
+  <div class="gd-mn">
+
+    <!-- En-tête : marque + propriétaire connecté -->
+    <div class="gd-mn-tete">
+      <div class="gd-mn-marque">
+        <div class="gd-brand-badge"><img src="assets/gardien/mark.png" alt=""></div>
+        <span>Empire Security</span>
+      </div>
+
+      <ion-menu-toggle [autoHide]="false" *ngIf="proprietaire$ | async as p">
+        <a class="gd-mn-profil" routerLink="/proprietaire/profil">
+          <img [gdImage]="p.photo" gdRepli="avatar" alt="Votre photo" class="gd-avatar">
+          <div class="gd-mn-identite">
+            <strong>{{ nomComplet(p) }}</strong>
+            <span>{{ p.telephone }}</span>
+            <span class="gd-status-pill active">
+              <ion-icon name="ellipse"></ion-icon>
+              {{ role(p.role) }}
+            </span>
+          </div>
+        </a>
+      </ion-menu-toggle>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="gd-mn-nav">
+      <section *ngFor="let s of sections">
+        <h4>{{ s.titre }}</h4>
+        <ion-menu-toggle [autoHide]="false" *ngFor="let e of s.entrees">
+          <a class="gd-mn-lien" [routerLink]="e.path" routerLinkActive="active" routerDirection="root">
+            <span class="gd-mn-icone"><ion-icon [name]="e.icon"></ion-icon></span>
+            <span>{{ e.label }}</span>
+            <span class="gd-mn-badge" *ngIf="e.badge && (nonLus$ | async) as n">{{ n > 99 ? '99+' : n }}</span>
+            <ion-icon name="chevron-forward" class="gd-mn-fleche"></ion-icon>
+          </a>
+        </ion-menu-toggle>
+      </section>
+    </nav>
+
+    <!-- Pied : déconnexion -->
+    <div class="gd-mn-pied">
+      <button type="button" class="gd-mn-deconnexion" (click)="deconnexion()">
+        <ion-icon name="log-out-outline"></ion-icon>
+        Se déconnecter
+      </button>
+      <p>Empire Security · Espace propriétaire</p>
+    </div>
+
+  </div>
+</ion-content>

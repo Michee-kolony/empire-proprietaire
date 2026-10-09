@@ -1,0 +1,440 @@
+// Discussion inspirée de WhatsApp : fond beige motif, bulles vertes (moi) et blanches (les autres)
+
+$fond: #efeae2;
+$bulle-moi: #d9fdd3;
+$bulle-autre: #ffffff;
+$texte: #111b21;
+$meta: #667781;
+$vert: #00a884;
+$bleu-lu: #53bdeb;
+
+:host ::ng-deep .gd-content {
+  --background: #{$fond};
+}
+
+.wa-fond {
+  min-height: 100%;
+  padding: 8px 10px 10px;
+  background-color: $fond;
+  // Motif discret façon papier peint WhatsApp
+  background-image:
+    radial-gradient(rgba(0, 0, 0, 0.035) 1.2px, transparent 1.2px),
+    radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+  background-size: 22px 22px, 22px 22px;
+  background-position: 0 0, 11px 11px;
+}
+
+.wa-centre {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* ---------- Puces centrées ---------- */
+
+.wa-puce,
+.wa-jour span {
+  padding: 5px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: $meta;
+  font-size: 12.5px;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+
+.wa-anciens {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px auto 8px;
+  border: none;
+  font-family: inherit;
+
+  ion-spinner {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.wa-info {
+  max-width: 330px;
+  margin: 4px auto 10px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #ffeecd;
+  color: #54656f;
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+
+  ion-icon {
+    font-size: 11px;
+    vertical-align: -1px;
+  }
+}
+
+.wa-jour {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 8px;
+
+  span {
+    text-transform: uppercase;
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+}
+
+/* ---------- Bulles ---------- */
+
+.wa-ligne {
+  display: flex;
+  margin-top: 10px;
+  padding: 0 8px;
+
+  &.suite {
+    margin-top: 2px;
+  }
+
+  &.moi {
+    justify-content: flex-end;
+  }
+}
+
+.wa-bulle {
+  position: relative;
+  max-width: 82%;
+  min-width: 80px;
+  padding: 6px 7px 8px 9px;
+  border-radius: 8px;
+  background: $bulle-autre;
+  color: $texte;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+
+  .moi & {
+    background: $bulle-moi;
+  }
+
+  // Queue de la bulle sur le premier message d'une série
+  .wa-ligne:not(.suite) & {
+    border-top-left-radius: 0;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -8px;
+      width: 8px;
+      height: 13px;
+      background: $bulle-autre;
+      clip-path: polygon(100% 0, 0 0, 100% 100%);
+    }
+  }
+
+  .wa-ligne.moi:not(.suite) & {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 0;
+
+    &::before {
+      left: auto;
+      right: -8px;
+      background: $bulle-moi;
+      clip-path: polygon(0 0, 100% 0, 0 100%);
+    }
+  }
+
+  &.photo-seule {
+    padding: 3px;
+
+    .wa-auteur {
+      padding: 3px 6px 4px;
+    }
+
+    .wa-meta {
+      right: 10px;
+      bottom: 8px;
+      color: #ffffff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+
+      ion-icon.lu {
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.wa-auteur {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 12.8px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  small {
+    font-weight: 400;
+    color: $meta;
+  }
+}
+
+.wa-texte {
+  margin: 0;
+  font-size: 14.6px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+// Réserve la place de l'heure à droite de la dernière ligne
+.wa-espace {
+  display: inline-block;
+  width: 48px;
+  height: 1px;
+
+  &.large {
+    width: 66px;
+  }
+
+  &.modifie {
+    width: 100px;
+
+    &.large {
+      width: 118px;
+    }
+  }
+}
+
+.wa-supprime {
+  font-style: italic;
+  color: $meta;
+
+  ion-icon {
+    vertical-align: -2px;
+  }
+}
+
+.wa-meta {
+  position: absolute;
+  right: 7px;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: $meta;
+  white-space: nowrap;
+
+  ion-icon {
+    font-size: 16px;
+
+    &.lu {
+      color: $bleu-lu;
+    }
+  }
+}
+
+.wa-photos {
+  display: grid;
+  gap: 3px;
+  margin-bottom: 4px;
+
+  .photo-seule & {
+    margin-bottom: 0;
+  }
+
+  &.multiple {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    min-width: 220px;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.06);
+  }
+
+  &.multiple img {
+    min-width: 0;
+    aspect-ratio: 1;
+    height: auto;
+  }
+}
+
+/* ---------- Saisie ---------- */
+
+.wa-pied {
+  flex-shrink: 0;
+  padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  background: $fond;
+}
+
+.wa-ferme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #ffffff;
+  color: $meta;
+  font-size: 13px;
+  text-align: center;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 16px;
+  }
+}
+
+.wa-erreur {
+  margin: 0 6px 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #fde8e8;
+  color: #b3182b;
+  font-size: 12.5px;
+}
+
+.wa-apercus {
+  position: relative;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin: 0 2px 6px;
+  padding: 8px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.wa-apercu {
+  position: relative;
+  flex-shrink: 0;
+
+  img {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    object-fit: cover;
+  }
+
+  button {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    font-size: 13px;
+  }
+}
+
+.wa-progression {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 3px;
+  height: 3px;
+  border-radius: 3px;
+  background: #e9edef;
+  overflow: hidden;
+
+  div {
+    height: 100%;
+    background: $vert;
+    transition: width 0.2s;
+  }
+}
+
+.wa-saisie {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.wa-champ {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  min-height: 48px;
+  padding: 0 6px 0 16px;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+
+  ion-textarea {
+    flex: 1;
+    max-height: 130px;
+    overflow-y: auto;
+    margin: 0;
+    --padding-top: 13px;
+    --padding-bottom: 13px;
+    --padding-start: 0;
+    --padding-end: 0;
+    --placeholder-color: #8696a0;
+    --placeholder-opacity: 1;
+    color: $texte;
+    font-size: 16px;
+  }
+}
+
+.wa-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 48px;
+  flex-shrink: 0;
+  color: #54656f;
+  font-size: 23px;
+
+  &:first-of-type ion-icon {
+    transform: rotate(-45deg);
+  }
+
+  &.desactive {
+    opacity: 0.35;
+  }
+}
+
+.wa-envoyer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: $vert;
+  color: #ffffff;
+  font-size: 21px;
+  box-shadow: 0 1px 3px rgba(11, 20, 26, 0.2);
+
+  ion-icon {
+    margin-left: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.55;
+  }
+
+  ion-spinner {
+    width: 22px;
+    height: 22px;
+    color: #ffffff;
+  }
+}

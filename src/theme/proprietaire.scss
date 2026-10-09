@@ -1,0 +1,401 @@
+// =====================================================
+// PROPRIETAIRE — Composants communs (cartes Leaflet, listes, formulaires)
+// Les marqueurs Leaflet sont créés hors d'Angular : leurs styles doivent être globaux.
+// =====================================================
+
+/* ---------- Carte Leaflet ---------- */
+
+.pr-carte {
+  position: relative;
+  z-index: 0;            // les panneaux Leaflet (z-index 400+) restent sous la barre du bas
+  isolation: isolate;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  background: #0e0e10;
+
+  .leaflet-container {
+    font-family: 'Roboto', sans-serif;
+    background: #0e0e10;
+  }
+
+  // Fond sombre : seules les tuiles sont inversées, les marqueurs gardent leurs couleurs
+  .pr-tuiles-sombres {
+    filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%) saturate(60%);
+  }
+
+  .leaflet-control-attribution {
+    background: rgba(14, 14, 16, 0.75);
+    color: #9ca3af;
+
+    a { color: #d4af37; }
+  }
+}
+
+.pr-pin {
+  background: none;
+  border: none;
+}
+
+.pr-pin-propriete {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #17171A, #0B0B0C);
+  border: 3px solid var(--gd-gold);
+  color: var(--gd-gold-light);
+  font-size: 19px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+.pr-pin-gardien {
+  position: relative;
+  width: 48px;
+  height: 56px;
+
+  span {
+    position: absolute;
+    top: 0;
+    left: 2px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background-size: cover;
+    background-position: center;
+    background-color: #ffffff;
+    border: 3px solid #9ca3af;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  // Pointe du repère
+  i {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 7px solid transparent;
+    border-right: 7px solid transparent;
+    border-top: 13px solid #9ca3af;
+  }
+
+  &.on span { border-color: #16a34a; }
+  &.on i { border-top-color: #16a34a; }
+  &.hors span { border-color: #f59e0b; }
+  &.hors i { border-top-color: #f59e0b; }
+
+  &.sel span {
+    border-color: var(--gd-gold);
+    box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.45), 0 4px 12px rgba(0, 0, 0, 0.35);
+  }
+  &.sel i { border-top-color: var(--gd-gold); }
+}
+
+// Incident non résolu : pastille rouge avec onde qui pulse
+.pr-pin-incident {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #dc2626;
+  border: 3px solid #ffffff;
+  color: #ffffff;
+  font-size: 18px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  b {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 3px solid #dc2626;
+    animation: pr-onde-incident 1.6s ease-out infinite;
+  }
+
+  &.g-faible { background: #f59e0b; b { border-color: #f59e0b; } }
+  &.g-moyenne { background: #ea580c; b { border-color: #ea580c; } }
+}
+
+@keyframes pr-onde-incident {
+  from { transform: scale(1); opacity: 0.9; }
+  to { transform: scale(2.2); opacity: 0; }
+}
+
+.pr-carte-legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--app-text-secondary);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  i {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2.5px solid;
+  }
+
+  .on { border-color: #16a34a; }
+  .off { border-color: #9ca3af; }
+  .hors { border-color: #f59e0b; }
+  .incident { border-color: #ffffff; background: #dc2626; box-shadow: 0 0 0 1.5px #dc2626; }
+  .prop { border-color: var(--gd-gold); background: #0B0B0C; }
+}
+
+/* ---------- Listes ---------- */
+
+.pr-lien-carte {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.pr-vignette {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--app-surface-alt);
+}
+
+.pr-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+
+  strong {
+    font-size: 14.5px;
+    color: var(--app-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.pr-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--app-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  ion-icon {
+    flex-shrink: 0;
+    color: var(--gd-gold-dark);
+  }
+}
+
+.pr-fleche {
+  flex-shrink: 0;
+  color: var(--app-text-secondary);
+  font-size: 18px;
+}
+
+.pr-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// Statut d'abonnement d'une propriété
+.pr-abo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  white-space: nowrap;
+
+  &.actif { background: rgba(46, 204, 113, 0.15); color: #16a34a; }
+  &.expire { background: rgba(230, 57, 70, 0.15); color: #b3182b; }
+  &.aucun { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
+  &.bientot { background: rgba(249, 115, 22, 0.15); color: #ea580c; }
+}
+
+// Rôle d'un gardien sur la propriété
+.pr-role {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(212, 175, 55, 0.18);
+  color: var(--gd-gold-dark);
+
+  &.remplacant {
+    background: rgba(107, 114, 128, 0.15);
+    color: #4b5563;
+  }
+}
+
+// Gardien en service / hors service
+.pr-service {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 700;
+  background: rgba(107, 114, 128, 0.15);
+  color: #6b7280;
+
+  ion-icon {
+    font-size: 8px;
+  }
+
+  &.on {
+    background: rgba(46, 204, 113, 0.15);
+    color: #16a34a;
+  }
+}
+
+.pr-avatar {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--gd-gold);
+  background: var(--app-surface-alt);
+}
+
+// Boutons ronds d'action (appeler, voir…)
+.pr-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pr-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: none;
+  background: var(--app-surface-alt);
+  color: var(--gd-gold-dark);
+  font-size: 19px;
+  text-decoration: none;
+
+  &.appel {
+    background: rgba(46, 204, 113, 0.15);
+    color: #16a34a;
+  }
+}
+
+/* ---------- Formulaires ---------- */
+
+.pr-champ {
+  --background: var(--app-surface-alt);
+  --border-radius: 10px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --highlight-color-focused: var(--gd-gold-dark);
+  margin-bottom: 10px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.pr-grille-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 10px;
+}
+
+.pr-obligatoire {
+  color: #b3182b;
+}
+
+.pr-succes {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  background: rgba(46, 204, 113, 0.12);
+  color: #15803d;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 17px;
+  }
+}
+
+.pr-alerte {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  background: rgba(249, 115, 22, 0.12);
+  color: #c2410c;
+  text-decoration: none;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 19px;
+  }
+
+  &.danger {
+    background: rgba(230, 57, 70, 0.12);
+    color: #b3182b;
+  }
+}
+
+.pr-section-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 2px -4px;
+
+  h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--app-text);
+  }
+
+  a {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--gd-gold-dark);
+    text-decoration: none;
+  }
+}
+
+.pr-fab {
+  --background: linear-gradient(135deg, var(--gd-gold-light), var(--gd-gold));
+  --color: #0B0B0C;
+}

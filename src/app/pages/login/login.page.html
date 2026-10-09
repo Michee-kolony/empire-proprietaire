@@ -1,0 +1,99 @@
+<ion-content [fullscreen]="true" class="login-content">
+
+  <div class="login-container">
+
+    <!-- =================================================
+         BANDEAU NOIR (texture topographique + vague)
+    ================================================== -->
+
+    <div class="login-hero">
+      <div class="hero-brand">
+        <img src="assets/logo.png" alt="Empire Security" class="brand-logo-img">
+        <span class="brand-pill">Espace Propriétaire</span>
+      </div>
+
+      <svg class="hero-vague" viewBox="0 0 400 90" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M0 62 C 70 92, 150 96, 220 66 S 340 8, 400 22 L400 90 L0 90 Z"></path>
+      </svg>
+    </div>
+
+    <!-- =================================================
+         FORMULAIRE
+    ================================================== -->
+
+    <div class="login-panel">
+      <h2 class="login-titre">Connexion</h2>
+
+      <div class="login-form">
+
+        <!-- IDENTIFIANT -->
+        <label class="champ">
+          <span class="champ-label">Téléphone ou email</span>
+          <span class="champ-ligne">
+            <ion-icon name="person-outline"></ion-icon>
+            <ion-input
+              placeholder="ex. 0812345678"
+              [(ngModel)]="loginData.identifiant"
+              type="text"
+              autocomplete="username"
+              autocapitalize="off"
+              [disabled]="isLoading"
+              (keyup.enter)="login()"
+            ></ion-input>
+          </span>
+        </label>
+
+        <!-- MOT DE PASSE -->
+        <label class="champ">
+          <span class="champ-label">Mot de passe</span>
+          <span class="champ-ligne">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            <ion-input
+              placeholder="Entrez votre mot de passe"
+              [(ngModel)]="loginData.password"
+              [type]="showPassword ? 'text' : 'password'"
+              autocomplete="current-password"
+              [disabled]="isLoading"
+              (keyup.enter)="login()"
+            ></ion-input>
+            <button type="button" class="password-toggle" (click)="togglePasswordVisibility()"
+              [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </button>
+          </span>
+        </label>
+
+        <!-- CONNEXION -->
+        <ion-button expand="block" class="btn-login" (click)="login()" [disabled]="isLoading">
+          <ng-container *ngIf="!isLoading">
+            <span>Se connecter</span>
+          </ng-container>
+
+          <ng-container *ngIf="isLoading">
+            <span class="login-spinner"></span>
+            <span>Connexion...</span>
+          </ng-container>
+        </ion-button>
+
+        <!-- INFO COMPTE -->
+        <p class="account-note">
+          Pas de compte ? <strong>Contactez Empire Security</strong>, qui crée votre compte propriétaire.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =====================================================
+       TOAST
+  ====================================================== -->
+
+  <div *ngIf="showToast" class="gd-toast" [class.gd-toast-error]="toastType === 'error'">
+    <ion-icon [name]="toastType === 'success' ? 'checkmark-outline' : 'alert-circle-outline'"></ion-icon>
+    <span>{{ toastMessage }}</span>
+    <button type="button" (click)="closeToast()">
+      <ion-icon name="close-outline"></ion-icon>
+    </button>
+  </div>
+
+</ion-content>

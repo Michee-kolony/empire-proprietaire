@@ -1,0 +1,93 @@
+<app-shell title="Abonnements" subtitle="Gardiennage &amp; paiements">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="gd-card" *ngFor="let i of [1, 2]">
+        <ion-skeleton-text [animated]="true" style="width: 55%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 85%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="charge">
+
+      <div class="pr-section-tete"><h3>Abonnements par propriété</h3></div>
+
+      <div class="gd-empty" *ngIf="proprietes.length === 0">
+        <ion-icon name="home-outline"></ion-icon>
+        <span>Ajoutez une propriété pour souscrire un abonnement de gardiennage.</span>
+      </div>
+
+      <a class="gd-card ab-propriete" *ngFor="let p of proprietes" [routerLink]="['/proprietaire/proprietes', p._id]">
+        <div class="ab-tete">
+          <strong>{{ p.nomReference }}</strong>
+          <span class="pr-abo" [ngClass]="etat(p).classe">
+            {{ p.statutAbonnement === 'actif' ? 'Actif' : p.statutAbonnement === 'expire' ? 'Expiré' : 'Aucun' }}
+          </span>
+        </div>
+        <span class="pr-meta">{{ etat(p).texte }}</span>
+        <div class="gd-progress-bar ab-barre" *ngIf="p.statutAbonnement === 'actif'">
+          <div class="gd-progress-fill" [style.width.%]="etat(p).progression * 100" [class.bientot]="etat(p).classe === 'bientot'"></div>
+        </div>
+      </a>
+
+      <p class="gd-hint ab-note">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        Les abonnements sont souscrits et renouvelés auprès d'Empire Security. Chaque paiement enregistré par
+        l'entreprise prolonge la période de gardiennage de la propriété concernée.
+      </p>
+
+      <div class="pr-section-tete">
+        <h3>Historique des paiements</h3>
+      </div>
+
+      <div class="gd-stats-row" *ngIf="paiements.length">
+        <div class="gd-stat-box">
+          <strong>{{ paiements.length }}</strong>
+          <span>Paiement{{ paiements.length > 1 ? 's' : '' }}</span>
+        </div>
+        <div class="gd-stat-box">
+          <strong class="ab-total" *ngFor="let t of totaux">{{ t }}</strong>
+          <span>Total payé</span>
+        </div>
+      </div>
+
+      <div class="gd-empty" *ngIf="paiements.length === 0">
+        <ion-icon name="receipt-outline"></ion-icon>
+        <span>Aucun paiement enregistré pour le moment.</span>
+      </div>
+
+      <div class="gd-card ab-paiement" *ngFor="let pa of paiements">
+        <div class="ab-icone"><ion-icon name="receipt-outline"></ion-icon></div>
+        <div class="pr-corps">
+          <div class="ab-tete">
+            <strong>{{ montant(pa.montant, pa.devise) }}</strong>
+            <span class="ab-date">{{ date(pa.createdAt) }}</span>
+          </div>
+          <span class="pr-meta"><ion-icon name="business-outline"></ion-icon> {{ pa.propriete?.nomReference || 'Propriété supprimée' }}</span>
+          <span class="pr-meta"><ion-icon name="calendar-outline"></ion-icon> {{ pa.dureeMois }} mois · du {{ date(pa.periodeDebut) }} au {{ date(pa.periodeFin) }}</span>
+          <span class="pr-meta"><ion-icon name="wallet-outline"></ion-icon> {{ mode(pa.modePaiement) }}</span>
+          <span class="ab-ref">Reçu {{ pa.referenceTransaction }}</span>
+          <span class="ab-description" *ngIf="pa.description">{{ pa.description }}</span>
+        </div>
+      </div>
+
+    </ng-container>
+  </div>
+
+</app-shell>

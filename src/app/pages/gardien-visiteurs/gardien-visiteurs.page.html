@@ -1,0 +1,114 @@
+<app-gardien-shell title="Visiteurs" subtitle="Registre d'accès à la propriété">
+
+  <div class="gd-page">
+
+    <div class="gd-note-row gd-card">
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
+      <span>Chaque personne qui entre sur la propriété doit être identifiée par une photo. Cela permet de prévenir les intrusions, vols et agressions.</span>
+    </div>
+
+    <div class="gd-stats-row" *ngIf="visiteurs.length > 0">
+      <div class="gd-stat-box">
+        <strong>{{ presents() }}</strong>
+        <span>Présents sur site</span>
+      </div>
+      <div class="gd-stat-box">
+        <strong>{{ visiteurs.length }}</strong>
+        <span>Total enregistrés</span>
+      </div>
+    </div>
+
+    <ion-button expand="block" class="btn-gold" (click)="ouvrirFormulaire()" *ngIf="!formulaireOuvert">
+      <ion-icon name="person-add-outline" slot="start"></ion-icon>
+      Enregistrer un visiteur
+    </ion-button>
+
+    <div class="gd-card" *ngIf="formulaireOuvert">
+      <h3 class="gd-card-title"><ion-icon name="camera-outline"></ion-icon> Photo d'identification (obligatoire)</h3>
+
+      <div class="gd-media-preview" *ngIf="photoPreview">
+        <img [src]="photoPreview" alt="Photo du visiteur">
+        <button type="button" (click)="removePhoto()"><ion-icon name="close-circle"></ion-icon></button>
+      </div>
+
+      <label class="gd-upload-btn" *ngIf="!photoPreview">
+        <ion-icon name="camera-outline"></ion-icon>
+        Prendre la photo du visiteur
+        <input type="file" accept="image/*" capture="environment" (change)="onPhotoSelected($event)" hidden>
+      </label>
+
+      <ion-item lines="none" class="gd-select-item gd-form-field">
+        <ion-input placeholder="Nom du visiteur" [(ngModel)]="form.nom"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="gd-select-item gd-form-field">
+        <ion-input placeholder="Motif de la visite" [(ngModel)]="form.motif"></ion-input>
+      </ion-item>
+
+      <ion-item lines="none" class="gd-select-item gd-form-field">
+        <ion-input placeholder="Personne visitée" [(ngModel)]="form.personneVisitee"></ion-input>
+      </ion-item>
+
+      <p class="gd-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+      <div class="gd-form-actions">
+        <ion-button fill="clear" (click)="annuler()">Annuler</ion-button>
+        <ion-button class="btn-dark" (click)="enregistrer()">Enregistrer l'entrée</ion-button>
+      </div>
+    </div>
+
+    <h3 class="gd-section-title">Historique des visites</h3>
+
+    <ion-searchbar
+      *ngIf="visiteurs.length > 0"
+      class="gd-searchbar"
+      placeholder="Rechercher un visiteur, un motif, une personne visitée..."
+      [(ngModel)]="recherche"
+      [debounce]="200"
+      mode="ios"
+    ></ion-searchbar>
+
+    <div class="gd-empty" *ngIf="visiteurs.length === 0">
+      <ion-icon name="people-outline"></ion-icon>
+      <span>Aucun visiteur enregistré.</span>
+    </div>
+
+    <div class="gd-empty" *ngIf="visiteurs.length > 0 && visiteursFiltres().length === 0">
+      <ion-icon name="search-outline"></ion-icon>
+      <span>Aucun visiteur ne correspond à « {{ recherche }} ».</span>
+    </div>
+
+    <div class="gd-card gd-visiteur-card" *ngFor="let v of visiteursFiltres()">
+      <div class="gd-visiteur-top">
+        <img [src]="v.photo" alt="Photo de {{ v.nom }}" class="gd-visiteur-photo">
+
+        <div class="gd-visiteur-info">
+          <h3>{{ v.nom }}</h3>
+          <span class="gd-status-chip" [class]="v.statut === 'present' ? 'en_cours' : 'terminee'">
+            {{ v.statut === 'present' ? 'Présent sur site' : 'Sorti' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="gd-info-row"><span class="gd-label">Motif</span><span class="gd-value">{{ v.motif }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Personne visitée</span><span class="gd-value">{{ v.personneVisitee }}</span></div>
+      <div class="gd-info-row">
+        <span class="gd-label">Entrée</span>
+        <span class="gd-value">{{ v.date }} à {{ v.heureEntree }}</span>
+      </div>
+      <div class="gd-info-row" *ngIf="v.heureSortie">
+        <span class="gd-label">Sortie</span>
+        <span class="gd-value">{{ v.heureSortie }}</span>
+      </div>
+
+      <div class="gd-rdv-actions" *ngIf="v.statut === 'present'">
+        <ion-button size="small" class="btn-outline-gold" fill="outline" (click)="enregistrerSortie(v.id)">
+          <ion-icon name="log-out-outline" slot="start"></ion-icon>
+          Enregistrer la sortie
+        </ion-button>
+      </div>
+    </div>
+
+  </div>
+
+</app-gardien-shell>

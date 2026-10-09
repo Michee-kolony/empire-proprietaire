@@ -1,0 +1,58 @@
+<ion-header class="gd-header" [translucent]="false">
+  <ion-toolbar class="gd-toolbar-dark">
+    <ion-buttons slot="start">
+      <ion-button (click)="retour()">
+        <ion-icon name="chevron-back-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Urgence</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="gd-urgence-content" [fullscreen]="true">
+
+  <div class="gd-urgence-wrap" *ngIf="!isSent">
+    <h1>Bouton d'urgence</h1>
+    <p>
+      Maintenez le bouton appuyé pendant quelques secondes pour déclencher
+      une alerte immédiate auprès de l'entreprise.
+    </p>
+
+    <div class="gd-sos-ring" [style.background]="'conic-gradient(#e63946 ' + progress + '%, rgba(255,255,255,0.08) ' + progress + '%)'">
+      <button
+        class="gd-sos-button"
+        (pointerdown)="startHold()"
+        (pointerup)="cancelHold()"
+        (pointerleave)="cancelHold()"
+        [disabled]="isSending"
+      >
+        <ion-icon name="alert" *ngIf="!isSending"></ion-icon>
+        <span class="gd-sos-spinner" *ngIf="isSending"></span>
+        <span>{{ isSending ? 'Envoi...' : 'SOS' }}</span>
+      </button>
+    </div>
+
+    <span class="gd-hold-hint">{{ isHolding ? 'Maintenez...' : 'Appuyez et maintenez' }}</span>
+  </div>
+
+  <div class="gd-urgence-sent" *ngIf="isSent">
+    <ion-icon name="checkmark-circle" class="gd-sent-icon"></ion-icon>
+    <h1>Alerte envoyée</h1>
+    <p>L'entreprise a été alertée immédiatement.</p>
+
+    <div class="gd-sent-checklist">
+      <div><ion-icon name="checkmark-outline"></ion-icon> Entreprise informée</div>
+      <div><ion-icon name="checkmark-outline"></ion-icon> Position GPS transmise</div>
+      <div><ion-icon name="checkmark-outline"></ion-icon> Incident enregistré automatiquement</div>
+      <div><ion-icon name="checkmark-outline"></ion-icon> Contacts prédéfinis informés</div>
+    </div>
+
+    <div class="gd-sent-details" *ngIf="incident">
+      <span>{{ incident.date }} à {{ incident.heure }}</span>
+      <span>{{ incident.gps.lat | number:'1.4-4' }}, {{ incident.gps.lng | number:'1.4-4' }}</span>
+    </div>
+
+    <ion-button expand="block" class="btn-gold" (click)="retour()">Retour au tableau de bord</ion-button>
+  </div>
+
+</ion-content>

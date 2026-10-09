@@ -1,0 +1,120 @@
+<app-shell [title]="titre" [subtitle]="ecrit || sousTitre" retour="/proprietaire/messages" [sansNav]="true"
+  [avatar]="conversation?.photo ?? ''" [avatarRepli]="conversation?.type === 'propriete' ? 'propriete' : 'avatar'">
+
+  <div class="wa-fond">
+
+    <!-- Chargement -->
+    <div class="wa-centre" *ngIf="isLoading && !conversation">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="conversation && !errorMessage">
+
+      <button type="button" class="wa-puce wa-anciens" *ngIf="plusAnciens" (click)="chargerPlusAnciens()" [disabled]="chargementAnciens">
+        <ion-spinner name="crescent" *ngIf="chargementAnciens"></ion-spinner>
+        Messages plus anciens
+      </button>
+
+      <div class="wa-info" *ngIf="!plusAnciens">
+        <ion-icon name="lock-closed"></ion-icon>
+        <span *ngIf="conversation.type === 'propriete'">Discussion de la propriété avec vos gardiens en service et l'administration Empire. </span>
+        Appuyez longuement sur un message pour le copier, ou pour le modifier ou le supprimer dans les 15 minutes.
+      </div>
+
+      <ng-container *ngFor="let l of lignes; trackBy: suivreLigne">
+
+        <div class="wa-jour" *ngIf="l.type === 'jour'"><span>{{ l.libelle }}</span></div>
+
+        <div class="wa-ligne" *ngIf="l.type === 'message'" [class.moi]="l.moi" [class.suite]="l.suite">
+          <div class="wa-bulle" [class.photo-seule]="!l.message.supprime && l.message.photos.length && !l.message.contenu"
+            (pointerdown)="appuiDebut(l.message)" (pointerup)="appuiFin()" (pointerleave)="appuiFin()" (pointercancel)="appuiFin()"
+            (contextmenu)="$event.preventDefault()">
+
+            <span class="wa-auteur" *ngIf="!l.moi && !l.suite && conversation.type === 'propriete'" [style.color]="couleur(l.message.auteur)">
+              {{ l.message.auteurNom }} <small>~ {{ role(l.message.auteurRole) }}</small>
+            </span>
+
+            <ng-container *ngIf="!l.message.supprime; else supprime">
+              <div class="wa-photos" *ngIf="l.message.photos.length" [class.multiple]="l.message.photos.length > 1">
+                <img *ngFor="let p of l.message.photos" [src]="p" alt="Photo" loading="lazy" (click)="ouvrirPhoto(p)">
+              </div>
+              <p class="wa-texte" *ngIf="l.message.contenu">{{ l.message.contenu }}<span class="wa-espace" [class.large]="l.moi" [class.modifie]="l.message.modifie"></span></p>
+            </ng-container>
+            <ng-template #supprime>
+              <p class="wa-texte wa-supprime">
+                <ion-icon name="ban-outline"></ion-icon>
+                {{ l.moi ? 'Vous avez supprimé ce message' : 'Ce message a été supprimé' }}<span class="wa-espace" [class.large]="l.moi"></span>
+              </p>
+            </ng-template>
+
+            <span class="wa-meta">
+              <ng-container *ngIf="l.message.modifie && !l.message.supprime">Modifié </ng-container>{{ heure(l.message.createdAt) }}
+              <ion-icon *ngIf="l.moi && !l.message.supprime" [name]="lu(l.message) ? 'checkmark-done' : 'checkmark'" [class.lu]="lu(l.message)"
+                [attr.aria-label]="lu(l.message) ? 'Lu' : 'Envoyé'"></ion-icon>
+            </span>
+          </div>
+        </div>
+      </ng-container>
+    </ng-container>
+  </div>
+
+  <!-- Visionneuse -->
+  <div class="gd-photo-viewer" *ngIf="photoOuverte" (click)="photoOuverte = null">
+    <img [src]="photoOuverte" alt="Photo">
+    <button type="button" aria-label="Fermer"><ion-icon name="close"></ion-icon></button>
+  </div>
+
+  <!-- Zone de saisie -->
+  <div shellPied class="wa-pied" *ngIf="conversation">
+    <div class="wa-ferme" *ngIf="!conversation.peutEcrire">
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      Vous ne pouvez plus écrire dans cette discussion : ce gardien n'est plus en service chez vous.
+    </div>
+
+    <ng-container *ngIf="conversation.peutEcrire">
+      <p class="wa-erreur" *ngIf="erreurEnvoi">{{ erreurEnvoi }}</p>
+
+      <div class="wa-apercus" *ngIf="photos.length">
+        <div class="wa-apercu" *ngFor="let p of photos">
+          <img [src]="p.url" alt="">
+          <button type="button" (click)="retirerPhoto(p)" [disabled]="envoi" aria-label="Retirer la photo">
+            <ion-icon name="close"></ion-icon>
+          </button>
+        </div>
+        <div class="wa-progression" *ngIf="envoi"><div [style.width.%]="progression * 100"></div></div>
+      </div>
+
+      <div class="wa-saisie">
+        <div class="wa-champ">
+          <ion-textarea [(ngModel)]="texte" (ionInput)="saisie()" placeholder="Message"
+            [autoGrow]="true" [rows]="1" [maxlength]="contenuMax" [disabled]="envoi" autocapitalize="sentences"></ion-textarea>
+
+          <label class="wa-icone" [class.desactive]="envoi || photos.length >= photosMax" aria-label="Joindre des photos">
+            <ion-icon name="attach"></ion-icon>
+            <input type="file" accept="image/*" multiple (change)="onPhotos($event)" [disabled]="envoi || photos.length >= photosMax" hidden>
+          </label>
+          <label class="wa-icone" *ngIf="!texte.trim()" [class.desactive]="envoi || photos.length >= photosMax" aria-label="Prendre une photo">
+            <ion-icon name="camera"></ion-icon>
+            <input type="file" accept="image/*" capture="environment" (change)="onPhotos($event)" [disabled]="envoi || photos.length >= photosMax" hidden>
+          </label>
+        </div>
+
+        <button type="button" class="wa-envoyer" (click)="envoyer()" [disabled]="!peutEnvoyer" aria-label="Envoyer">
+          <ion-spinner name="crescent" *ngIf="envoi"></ion-spinner>
+          <ion-icon name="send" *ngIf="!envoi"></ion-icon>
+        </button>
+      </div>
+    </ng-container>
+  </div>
+
+</app-shell>

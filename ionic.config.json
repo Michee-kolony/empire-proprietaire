@@ -1,0 +1,7 @@
+{
+  "name": "Empire Security",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}

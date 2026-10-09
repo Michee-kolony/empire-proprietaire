@@ -1,0 +1,154 @@
+<app-shell title="Carte des gardiens" subtitle="Vos propriétés et leurs gardiens">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <!-- Choix de la propriété -->
+    <div class="ca-filtres" *ngIf="proprietes.length > 1">
+      <button type="button" [class.actif]="filtre === 'toutes'" (click)="choisirFiltre('toutes')">
+        <ion-icon name="apps-outline"></ion-icon> Toutes
+      </button>
+      <button type="button" *ngFor="let p of proprietes" [class.actif]="filtre === p._id" (click)="choisirFiltre(p._id)">
+        <ion-icon name="home-outline"></ion-icon> {{ p.nomReference }}
+      </button>
+    </div>
+
+    <!-- Carte -->
+    <div class="ca-carte">
+      <app-carte-gardiens
+        hauteur="52vh"
+        [proprietes]="proprietesCarte"
+        [gardiens]="gardiensCarte"
+        [incidents]="incidentsCarte"
+        (incidentClique)="ouvrirIncident($event)"
+        [selection]="selection"
+        (gardienClique)="choisirGardien($event)"
+      ></app-carte-gardiens>
+
+      <button type="button" class="ca-recentrer" (click)="recentrer()" aria-label="Recentrer la carte">
+        <ion-icon name="scan-outline"></ion-icon>
+      </button>
+
+      <div class="ca-chargement" *ngIf="isLoading">
+        <ion-spinner name="crescent"></ion-spinner>
+      </div>
+    </div>
+
+    <div class="ca-infos">
+      <div class="pr-carte-legende">
+        <span><i class="prop"></i> Propriété (zone {{ rayon }} m)</span>
+        <span><i class="on"></i> En service</span>
+        <span><i class="hors"></i> En service, hors zone</span>
+        <span><i class="incident"></i> Incident en cours</span>
+      </div>
+      <span class="ca-maj" *ngIf="derniereMiseAJour">
+        <ion-icon name="sync-outline"></ion-icon> {{ derniereMiseAJour | date:'HH:mm:ss' }}
+      </span>
+    </div>
+
+    <!-- Incidents non résolus -->
+    <a class="pr-alerte danger ca-incident" *ngFor="let i of incidentsVisibles" (click)="ouvrirIncident(i._id)">
+      <ion-icon [name]="iconeIncident(i.type)"></ion-icon>
+      <span>
+        <strong>{{ i.typeLibelle }}</strong> · {{ i.graviteLibelle }}<ng-container *ngIf="i.propriete"> · {{ i.propriete.nomReference }}</ng-container><br>
+        {{ i.statutLibelle }} · {{ depuis(i.dateIncident) }}
+      </span>
+    </a>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- Gardien sélectionné -->
+    <div class="gd-card ca-fiche" *ngIf="ligneSelectionnee as l">
+      <button type="button" class="ca-fermer" (click)="selection = null" aria-label="Fermer"><ion-icon name="close"></ion-icon></button>
+      <div class="ca-fiche-tete">
+        <img [gdImage]="l.poste.gardien.photoProfil" gdRepli="avatar" alt="" class="pr-avatar">
+        <div class="pr-corps">
+          <strong>{{ nomComplet(l.poste.gardien) }}</strong>
+          <span class="pr-meta">Matricule {{ l.poste.gardien.matricule }}</span>
+          <div class="pr-badges">
+            <span class="pr-service" [class.on]="l.poste.gardien.statut === 'en service'">
+              <ion-icon name="ellipse"></ion-icon>
+              {{ l.poste.gardien.statut === 'en service' ? 'En service' : 'Hors service' }}
+            </span>
+            <span class="pr-abo" *ngIf="l.distance !== null" [ngClass]="surSite(l) ? 'actif' : 'bientot'">
+              {{ surSite(l) ? 'Sur le site' : 'Hors zone' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gd-info-row" *ngIf="l.propriete"><span class="gd-label">Propriété</span><span class="gd-value">{{ l.propriete.nomReference }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Horaire</span><span class="gd-value">{{ horaire(affectationDe(l)) }}</span></div>
+      <div class="gd-info-row" *ngIf="l.distance !== null"><span class="gd-label">Distance de la propriété</span><span class="gd-value">{{ distanceLabel(l.distance) }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Dernière position</span><span class="gd-value">{{ l.position ? depuis(l.poste.gardien.updatedAt) : 'Inconnue' }}</span></div>
+
+      <div class="ca-fiche-actions">
+        <a class="ca-bouton appel" *ngIf="l.poste.gardien.telephonePrincipal" [href]="lienTel(l.poste.gardien.telephonePrincipal)">
+          <ion-icon name="call"></ion-icon> Appeler
+        </a>
+        <a class="ca-bouton" [routerLink]="['/proprietaire/gardiens', l.poste.gardien._id]">
+          <ion-icon name="person"></ion-icon> Profil
+        </a>
+      </div>
+    </div>
+
+    <!-- Propriétés sans position -->
+    <div class="pr-alerte" *ngFor="let p of sansPosition">
+      <ion-icon name="location-outline"></ion-icon>
+      <span>« {{ p.nomReference }} » n'est pas placée sur la carte. Contactez Empire Security pour indiquer sa position.</span>
+    </div>
+
+    <ng-container *ngIf="charge">
+      <div class="pr-section-tete">
+        <h3>Gardiens en poste ({{ lignes.length }})</h3>
+        <span class="ca-compte">{{ nombreEnService }} en service</span>
+      </div>
+
+      <div class="gd-empty" *ngIf="lignes.length === 0">
+        <ion-icon name="people-outline"></ion-icon>
+        <span *ngIf="proprietes.length">Aucun gardien n'est affecté {{ filtre === 'toutes' ? 'à vos propriétés' : 'à cette propriété' }} en ce moment.</span>
+        <span *ngIf="!proprietes.length">Ajoutez une propriété pour suivre ses gardiens ici.</span>
+      </div>
+
+      <button type="button" class="gd-card ca-ligne" *ngFor="let l of lignes"
+        [class.sel]="selection === l.poste.gardien._id" (click)="choisirGardien(l.poste.gardien._id)">
+        <img [gdImage]="l.poste.gardien.photoProfil" gdRepli="avatar" alt="" class="pr-avatar">
+        <div class="pr-corps">
+          <strong>{{ nomComplet(l.poste.gardien) }}</strong>
+          <div class="pr-badges">
+            <span class="pr-service" [class.on]="l.poste.gardien.statut === 'en service'">
+              <ion-icon name="ellipse"></ion-icon>
+              {{ l.poste.gardien.statut === 'en service' ? 'En service' : 'Hors service' }}
+            </span>
+          </div>
+          <span class="pr-meta" *ngIf="l.propriete"><ion-icon name="business-outline"></ion-icon> {{ l.propriete.nomReference }}</span>
+          <span class="pr-meta" *ngIf="l.position && l.distance !== null">
+            <ion-icon name="navigate-outline"></ion-icon>
+            {{ surSite(l) ? 'Sur le site' : 'À ' + distanceLabel(l.distance) }} · {{ depuis(l.poste.gardien.updatedAt) }}
+          </span>
+          <span class="pr-meta" *ngIf="!l.position"><ion-icon name="help-circle-outline"></ion-icon> Position inconnue</span>
+        </div>
+        <ion-icon name="locate-outline" class="pr-fleche" *ngIf="l.position"></ion-icon>
+      </button>
+
+      <p class="gd-hint ca-note">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        Un gardien apparaît sur la carte dès qu'il pointe son arrivée et disparaît à son départ. Sa position est envoyée par son téléphone pendant le service ;
+        la carte s'actualise toutes les 10 secondes.
+      </p>
+    </ng-container>
+
+  </div>
+
+</app-shell>

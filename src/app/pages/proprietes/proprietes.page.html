@@ -1,0 +1,67 @@
+<app-shell title="Mes propriétés" [subtitle]="charge ? proprietes.length + ' bien' + (proprietes.length > 1 ? 's' : '') + ' enregistré' + (proprietes.length > 1 ? 's' : '') : ''">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <ion-searchbar
+      *ngIf="proprietes.length > 2"
+      class="gd-searchbar"
+      placeholder="Rechercher (nom, commune, quartier…)"
+      [value]="recherche"
+      (ionInput)="onRecherche($any($event))"
+      [debounce]="150"
+    ></ion-searchbar>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="gd-card" *ngFor="let i of [1, 2, 3]">
+        <ion-skeleton-text [animated]="true" style="width: 100%; height: 120px; border-radius: 12px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 60%; height: 18px"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- Vide -->
+    <div class="gd-empty" *ngIf="charge && !errorMessage && proprietes.length === 0">
+      <ion-icon name="home-outline"></ion-icon>
+      <span>Vous n'avez encore enregistré aucune propriété.</span>
+    </div>
+    <div class="gd-empty" *ngIf="charge && proprietes.length > 0 && filtrees.length === 0">
+      <ion-icon name="search-outline"></ion-icon>
+      <span>Aucune propriété ne correspond à « {{ recherche }} ».</span>
+    </div>
+
+    <a class="pp-carte" *ngFor="let p of filtrees" [routerLink]="['/proprietaire/proprietes', p._id]">
+      <div class="pp-photo">
+        <img [gdImage]="p.photos[0]" gdRepli="propriete" alt="" loading="lazy">
+        <span class="pp-type"><ion-icon [name]="iconeType(p.typePropriete)"></ion-icon> {{ libelleType(p) }}</span>
+        <span class="pp-photos" *ngIf="p.photos.length > 1"><ion-icon name="images-outline"></ion-icon> {{ p.photos.length }}</span>
+      </div>
+      <div class="pp-corps">
+        <div class="pp-titre">
+          <strong>{{ p.nomReference }}</strong>
+          <ion-icon name="chevron-forward" class="pr-fleche"></ion-icon>
+        </div>
+        <span class="pr-meta"><ion-icon name="location-outline"></ion-icon> {{ adresse(p) }}</span>
+        <div class="pr-badges">
+          <span class="pr-abo" [ngClass]="abonnement(p).classe">{{ abonnement(p).texte }}</span>
+          <span class="pr-abo aucun" *ngIf="p.coordonnees.lat === null"><ion-icon name="location-outline"></ion-icon> Non placée sur la carte</span>
+        </div>
+      </div>
+    </a>
+
+  </div>
+
+</app-shell>

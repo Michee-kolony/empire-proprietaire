@@ -1,0 +1,22 @@
+<ion-app>
+  <!-- Menu latéral du propriétaire (désactivé hors connexion) -->
+  <ion-menu menuId="proprietaire" contentId="main" type="overlay" [disabled]="!(proprietaire$ | async)">
+    <app-menu></app-menu>
+  </ion-menu>
+
+  <ion-router-outlet id="main"></ion-router-outlet>
+
+  <!-- Alarme : incident non résolu sur une propriété (visible sur toutes les pages) -->
+  <ng-container *ngIf="proprietaire$ | async">
+    <div class="alarme" *ngIf="(alarme.actifs$ | async) as actifs" [hidden]="!actifs.length" [class.muette]="!(alarme.sonne$ | async)">
+      <ion-icon name="warning" class="alarme-icone"></ion-icon>
+      <button type="button" class="alarme-texte" (click)="voirIncidents(actifs)">
+        <strong>{{ actifs.length }} incident{{ actifs.length > 1 ? 's' : '' }} en cours</strong>
+        <span>{{ actifs[0]?.typeLibelle }}<ng-container *ngIf="actifs[0]?.propriete"> — {{ actifs[0].propriete?.nomReference }}</ng-container></span>
+      </button>
+      <button type="button" class="alarme-son" *ngIf="alarme.sonne$ | async" (click)="alarme.couperSon()" aria-label="Couper le son">
+        <ion-icon name="volume-mute"></ion-icon>
+      </button>
+    </div>
+  </ng-container>
+</ion-app>

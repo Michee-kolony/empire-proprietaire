@@ -1,0 +1,125 @@
+<app-gardien-shell title="Rapports" subtitle="Transmis à l'administration">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <ion-button expand="block" class="btn-gold" (click)="ouvrirForm()">
+      <ion-icon name="create-outline" slot="start"></ion-icon>
+      Nouveau rapport
+    </ion-button>
+    <p class="gd-hint gd-rp-regle">Un rapport se fait pendant votre service ou jusqu'à 24 h après sa fin.</p>
+
+    <p class="gd-rp-succes" *ngIf="messageSucces"><ion-icon name="checkmark-circle"></ion-icon> {{ messageSucces }}</p>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="gd-card" *ngFor="let i of [1, 2]">
+        <ion-skeleton-text [animated]="true" style="width: 45%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 100%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <div class="gd-empty" *ngIf="charge && !errorMessage && rapports.length === 0">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <span>Aucun rapport envoyé pour le moment.</span>
+    </div>
+
+    <div class="gd-card" *ngFor="let r of rapports">
+      <div class="gd-rp-tete">
+        <div>
+          <strong>{{ r.objetLibelle || r.objet }}</strong>
+          <span class="gd-rp-date">{{ date(r.createdAt) }} à {{ heure(r.createdAt) }}</span>
+        </div>
+        <span class="gd-status-chip" [ngClass]="'gd-rp-' + r.statut">{{ statutLabel(r.statut) }}</span>
+      </div>
+
+      <p class="gd-rp-propriete" *ngIf="r.propriete">
+        <ion-icon name="business-outline"></ion-icon> {{ r.propriete.nomReference }}
+        <ng-container *ngIf="r.presence"> — service du <span class="gd-rp-jour">{{ jourLabel(r.presence.jourService) }}</span></ng-container>
+      </p>
+
+      <p class="gd-rp-description">{{ r.description }}</p>
+
+      <div class="gd-rp-reponse" *ngIf="r.commentaireAdmin">
+        <strong><ion-icon name="chatbubble-ellipses-outline"></ion-icon> Réponse de l'administration</strong>
+        <p>{{ r.commentaireAdmin }}</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =================================================
+       FORMULAIRE
+  ================================================== -->
+  <ion-modal [isOpen]="formOuvert" (didDismiss)="fermerForm()">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar class="gd-toolbar">
+          <ion-title>Nouveau rapport</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fermerForm()" aria-label="Fermer"><ion-icon name="close" slot="icon-only"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content class="gd-content">
+        <div class="gd-page">
+          <div class="gd-card">
+            <ion-select
+              label="Objet"
+              labelPlacement="stacked"
+              interface="action-sheet"
+              cancelText="Annuler"
+              placeholder="Choisir l'objet"
+              [value]="objet"
+              (ionChange)="onObjet($any($event))"
+              [disabled]="envoiEnCours"
+            >
+              <ion-select-option *ngFor="let o of objets" [value]="o.valeur">{{ o.libelle }}</ion-select-option>
+            </ion-select>
+          </div>
+
+          <div class="gd-card">
+            <ion-textarea
+              label="Description"
+              labelPlacement="stacked"
+              placeholder="Décrivez ce qui s'est passé : faits, heure, personnes concernées..."
+              [value]="description"
+              (ionInput)="onDescription($any($event))"
+              [autoGrow]="true"
+              rows="6"
+              [maxlength]="descriptionMax"
+              [counter]="true"
+              [disabled]="envoiEnCours"
+            ></ion-textarea>
+            <p class="gd-hint gd-rp-min" *ngIf="description.trim().length < descriptionMin">Au moins {{ descriptionMin }} caractères.</p>
+          </div>
+
+          <p class="gd-error" *ngIf="erreurForm">{{ erreurForm }}</p>
+
+          <ion-button expand="block" class="btn-gold" (click)="envoyer()" [disabled]="!peutEnvoyer">
+            <ion-spinner name="crescent" slot="start" *ngIf="envoiEnCours"></ion-spinner>
+            <ion-icon name="send-outline" slot="start" *ngIf="!envoiEnCours"></ion-icon>
+            {{ envoiEnCours ? 'Envoi…' : 'Envoyer à l\'administration' }}
+          </ion-button>
+          <p class="gd-hint gd-rp-regle">Le rapport est rattaché automatiquement à votre service en cours ou au dernier terminé.</p>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</app-gardien-shell>

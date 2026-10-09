@@ -1,0 +1,77 @@
+<app-gardien-shell title="Profil" subtitle="Mon compte gardien">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page" *ngIf="guard as g">
+
+    <div class="gd-card gd-profile-card">
+      <img [gdImage]="g.photoProfil" gdRepli="avatar" alt="Photo du gardien" class="gd-avatar gd-avatar-lg">
+      <div class="gd-profile-info">
+        <h2>{{ nomComplet(g) }}</h2>
+        <span class="gd-matricule">Matricule : {{ g.matricule }}</span>
+        <span class="gd-status-pill" [class.active]="g.statut === 'en service'">
+          <ion-icon name="ellipse"></ion-icon>
+          {{ g.statut === 'en service' ? 'En service' : 'Non en service' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="gd-empty gd-pr-erreur" *ngIf="errorMessage">
+      <span>{{ errorMessage }}</span>
+      <ion-button size="small" fill="outline" class="btn-outline-gold" (click)="charger()" [disabled]="isLoading">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="gd-card">
+      <h3 class="gd-card-title"><ion-icon name="call-outline"></ion-icon> Contact</h3>
+      <div class="gd-info-row">
+        <span class="gd-label">Téléphone principal</span>
+        <a class="gd-value gd-pr-lien" [href]="lienTel(g.telephonePrincipal)">{{ g.telephonePrincipal || '—' }}</a>
+      </div>
+      <div class="gd-info-row" *ngIf="g.telephoneSecondaire">
+        <span class="gd-label">Téléphone secondaire</span>
+        <a class="gd-value gd-pr-lien" [href]="lienTel(g.telephoneSecondaire)">{{ g.telephoneSecondaire }}</a>
+      </div>
+      <div class="gd-info-row"><span class="gd-label">Email</span><span class="gd-value gd-pr-email">{{ g.email }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Adresse</span><span class="gd-value">{{ adresse || '—' }}</span></div>
+    </div>
+
+    <!-- AVIS DES PROPRIETAIRES -->
+    <div class="gd-card">
+      <h3 class="gd-card-title"><ion-icon name="chatbubbles-outline"></ion-icon> Avis des propriétaires</h3>
+
+      <div class="gd-empty" *ngIf="!g.commentaires?.length">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <span>Aucun avis pour le moment.</span>
+      </div>
+
+      <div class="gd-commentaire" *ngFor="let c of g.commentaires">
+        <img [gdImage]="c.photoProprietaire" gdRepli="avatar" [alt]="c.nomProprietaire">
+        <div>
+          <strong>{{ c.nomProprietaire }}</strong>
+          <small>{{ date(c.dateAjout) }}</small>
+          <p>{{ c.contenu }}</p>
+        </div>
+      </div>
+    </div>
+
+    <p class="gd-hint gd-pr-note">
+      <ion-icon name="lock-closed-outline"></ion-icon>
+      Pour modifier vos informations, contactez l'administration.
+    </p>
+
+    <ion-button expand="block" class="btn-dark" (click)="deconnexion()">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Se déconnecter
+    </ion-button>
+
+    <p class="gd-app-version">Empire Security — Espace Gardien — v1.0.0</p>
+
+  </div>
+
+</app-gardien-shell>

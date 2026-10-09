@@ -1,0 +1,110 @@
+<app-shell title="Rapports des gardiens" subtitle="Sur vos propriétés">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <!-- Filtres -->
+    <div class="gd-card rp-filtres">
+      <button type="button" class="rp-filtres-tete" (click)="filtresOuverts = !filtresOuverts" [attr.aria-expanded]="filtresOuverts">
+        <ion-icon name="funnel-outline"></ion-icon>
+        <span>Filtres<ng-container *ngIf="nombreFiltres"> ({{ nombreFiltres }})</ng-container></span>
+        <ion-icon class="rp-chevron" [name]="filtresOuverts ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </button>
+
+      <div class="rp-filtres-corps" *ngIf="filtresOuverts">
+        <ion-select label="Propriété" labelPlacement="stacked" interface="action-sheet" cancelText="Annuler" *ngIf="proprietes.length > 1"
+          [value]="filtres.propriete ?? ''" (ionChange)="changerFiltre('propriete', $any($event))">
+          <ion-select-option value="">Toutes</ion-select-option>
+          <ion-select-option *ngFor="let p of proprietes" [value]="p._id">{{ p.nomReference }}</ion-select-option>
+        </ion-select>
+
+        <ion-select label="Objet" labelPlacement="stacked" interface="action-sheet" cancelText="Annuler"
+          [value]="filtres.objet ?? ''" (ionChange)="changerFiltre('objet', $any($event))">
+          <ion-select-option value="">Tous</ion-select-option>
+          <ion-select-option *ngFor="let o of objets" [value]="o.valeur">{{ o.libelle }}</ion-select-option>
+        </ion-select>
+
+        <div class="rp-periode">
+          <ion-input type="date" label="Du" labelPlacement="stacked" [max]="filtres.au || aujourdHui"
+            [value]="filtres.du ?? ''" (ionChange)="changerFiltre('du', $any($event))"></ion-input>
+          <ion-input type="date" label="Au" labelPlacement="stacked" [min]="filtres.du" [max]="aujourdHui"
+            [value]="filtres.au ?? ''" (ionChange)="changerFiltre('au', $any($event))"></ion-input>
+        </div>
+
+        <ion-button fill="clear" size="small" class="rp-effacer" *ngIf="nombreFiltres" (click)="effacerFiltres()">
+          <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+          Effacer les filtres
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="gd-card" *ngFor="let i of [1, 2, 3]">
+        <ion-skeleton-text [animated]="true" style="width: 55%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 35%"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- Vide -->
+    <div class="gd-empty" *ngIf="charge && !isLoading && !errorMessage && rapports.length === 0">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <span *ngIf="!nombreFiltres">Aucun rapport de gardien pour le moment.</span>
+      <span *ngIf="nombreFiltres">Aucun rapport pour ces filtres.</span>
+    </div>
+
+    <ng-container *ngIf="!errorMessage">
+      <div class="gd-card rp-carte" *ngFor="let r of rapports">
+        <button type="button" class="rp-tete" (click)="basculer(r._id)" [attr.aria-expanded]="ouvert === r._id">
+          <img [gdImage]="r.gardien?.photoProfil" gdRepli="avatar" alt="" class="pr-avatar">
+          <div class="rp-corps">
+            <div class="rp-titre">
+              <ion-icon [name]="icone(r.objet)"></ion-icon>
+              <strong>{{ r.objetLibelle || r.objet }}</strong>
+            </div>
+            <span class="rp-meta"><ion-icon name="person-outline"></ion-icon> {{ nomComplet(r.gardien) || 'Gardien' }}</span>
+            <span class="rp-meta" *ngIf="r.propriete"><ion-icon name="business-outline"></ion-icon> {{ r.propriete.nomReference }}</span>
+            <span class="rp-meta"><ion-icon name="time-outline"></ion-icon> {{ dateHeure(r.createdAt) }}</span>
+          </div>
+          <ion-icon class="rp-chevron" [name]="ouvert === r._id ? 'chevron-up' : 'chevron-down'"></ion-icon>
+        </button>
+
+        <p class="rp-description" [class.tronque]="ouvert !== r._id">{{ r.description }}</p>
+
+        <ng-container *ngIf="ouvert === r._id">
+          <span class="rp-meta" *ngIf="service(r)"><ion-icon name="calendar-outline"></ion-icon> {{ service(r) }}</span>
+
+          <div class="rp-reponse" *ngIf="r.commentaireAdmin">
+            <strong><ion-icon name="chatbubble-ellipses-outline"></ion-icon> Réponse d'Empire Security</strong>
+            <p>{{ r.commentaireAdmin }}</p>
+          </div>
+
+          <div class="rp-actions" *ngIf="r.gardien">
+            <a class="rp-bouton appel" *ngIf="r.gardien.telephonePrincipal" [href]="lienTel(r.gardien.telephonePrincipal)">
+              <ion-icon name="call"></ion-icon> Appeler
+            </a>
+            <a class="rp-bouton" [routerLink]="['/proprietaire/gardiens', r.gardien._id]">
+              <ion-icon name="person"></ion-icon> Profil du gardien
+            </a>
+          </div>
+        </ng-container>
+      </div>
+    </ng-container>
+
+  </div>
+
+</app-shell>

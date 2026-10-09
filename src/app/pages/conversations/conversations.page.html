@@ -1,0 +1,132 @@
+<app-shell title="Messages" subtitle="Gardiens et administration">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="wa-liste">
+
+    <!-- Recherche + filtres -->
+    <div class="wa-recherche">
+      <ion-icon name="search"></ion-icon>
+      <input type="search" [(ngModel)]="recherche" placeholder="Rechercher" aria-label="Rechercher une discussion">
+    </div>
+
+    <div class="wa-filtres">
+      <button type="button" *ngFor="let f of filtres" [class.actif]="filtre === f.valeur" (click)="filtre = f.valeur">
+        {{ f.libelle }}<ng-container *ngIf="f.valeur === 'non-lues' && nombreNonLues"> {{ nombreNonLues }}</ng-container>
+      </button>
+    </div>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="wa-ligne" *ngFor="let i of [1, 2, 3, 4]">
+        <ion-skeleton-text [animated]="true" class="wa-photo"></ion-skeleton-text>
+        <div class="wa-corps">
+          <ion-skeleton-text [animated]="true" style="width: 50%; height: 15px"></ion-skeleton-text>
+          <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <ng-container *ngIf="charge && !errorMessage">
+      <a class="wa-ligne" *ngFor="let c of conversationsFiltrees" [routerLink]="['/proprietaire/messages', c._id]" [class.non-lue]="c.nonLus > 0">
+        <img class="wa-photo" [gdImage]="c.photo" [gdRepli]="c.type === 'propriete' ? 'propriete' : 'avatar'" alt="">
+
+        <div class="wa-corps">
+          <div class="wa-haut">
+            <strong>{{ c.titre }}</strong>
+            <span class="wa-date">{{ date(c.dernierMessage.date) }}</span>
+          </div>
+          <div class="wa-bas">
+            <ion-icon *ngIf="!c.peutEcrire" name="lock-closed" class="wa-cadenas" aria-label="Discussion fermée"></ion-icon>
+            <ion-icon *ngIf="c.type === 'propriete' && !c.dernierMessage.date" name="people" class="wa-cadenas"></ion-icon>
+            <span class="wa-apercu">{{ apercu(c) }}</span>
+            <span class="wa-badge" *ngIf="c.nonLus > 0">{{ c.nonLus > 99 ? '99+' : c.nonLus }}</span>
+          </div>
+        </div>
+      </a>
+
+      <div class="wa-vide" *ngIf="!conversationsFiltrees.length">
+        <ion-icon name="chatbubbles-outline"></ion-icon>
+        <span *ngIf="recherche || filtre !== 'toutes'; else aucune">Aucune discussion ne correspond.</span>
+        <ng-template #aucune><span>Aucune discussion. Touchez le bouton en bas pour écrire à un gardien ou à l'administration.</span></ng-template>
+      </div>
+
+      <p class="wa-mention" *ngIf="conversationsFiltrees.length">
+        <ion-icon name="lock-closed"></ion-icon>
+        Vos discussions sont réservées à vos propriétés, vos gardiens et l'administration Empire.
+      </p>
+    </ng-container>
+  </div>
+
+  <!-- Nouvelle discussion -->
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end">
+    <ion-fab-button class="wa-fab" (click)="nouvelleDiscussion()" aria-label="Nouvelle discussion">
+      <ion-icon name="chatbox-ellipses"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <!-- Choix du correspondant -->
+  <ion-modal [isOpen]="choixOuvert" (didDismiss)="choixOuvert = false" [initialBreakpoint]="0.85" [breakpoints]="[0, 0.85, 1]">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar class="wa-modal-toolbar">
+          <ion-buttons slot="start">
+            <ion-button (click)="choixOuvert = false" aria-label="Fermer"><ion-icon slot="icon-only" name="arrow-back"></ion-icon></ion-button>
+          </ion-buttons>
+          <ion-title>
+            Nouvelle discussion
+            <small *ngIf="contactsCharges">{{ contacts.length }} contact{{ contacts.length > 1 ? 's' : '' }}</small>
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="wa-modal">
+        <p class="wa-erreur-contacts" *ngIf="contactsErreur">{{ contactsErreur }}</p>
+
+        <ng-container *ngIf="!contactsCharges && !contactsErreur">
+          <div class="wa-ligne" *ngFor="let i of [1, 2, 3]">
+            <ion-skeleton-text [animated]="true" class="wa-photo"></ion-skeleton-text>
+            <div class="wa-corps"><ion-skeleton-text [animated]="true" style="width: 60%"></ion-skeleton-text></div>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="contactsCharges">
+          <h4 class="wa-groupe" *ngIf="gardiens.length">Vos gardiens en service</h4>
+          <button type="button" class="wa-ligne" *ngFor="let g of gardiens" (click)="ouvrirContact(g)" [disabled]="!!ouverture">
+            <img class="wa-photo" [gdImage]="g.photo" gdRepli="avatar" alt="">
+            <div class="wa-corps">
+              <strong>{{ g.nom }}</strong>
+              <span class="wa-apercu">
+                {{ g.propriete?.nomReference }}<ng-container *ngIf="g.roleAffectation"> · {{ g.roleAffectation === 'principal' ? 'Principal' : 'Remplaçant' }}</ng-container>
+              </span>
+            </div>
+            <ion-spinner name="crescent" *ngIf="ouverture === g.id"></ion-spinner>
+          </button>
+
+          <h4 class="wa-groupe">Administration Empire</h4>
+          <button type="button" class="wa-ligne" *ngFor="let a of administration" (click)="ouvrirContact(a)" [disabled]="!!ouverture">
+            <div class="wa-photo wa-photo-admin"><ion-icon name="shield-checkmark"></ion-icon></div>
+            <div class="wa-corps">
+              <strong>{{ a.nom }}</strong>
+              <span class="wa-apercu">{{ role(a.role) }}</span>
+            </div>
+            <ion-spinner name="crescent" *ngIf="ouverture === a.id"></ion-spinner>
+          </button>
+          <p class="wa-mention" *ngIf="!administration.length">Aucun administrateur disponible.</p>
+        </ng-container>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</app-shell>
