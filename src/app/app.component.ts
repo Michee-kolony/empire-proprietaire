@@ -14,7 +14,9 @@ import { ProprietaireAuthService } from './services/proprietaire-auth.service';
   standalone: false,
 })
 export class AppComponent {
-  readonly proprietaire$ = inject(ProprietaireAuthService).proprietaire$;
+  private auth = inject(ProprietaireAuthService);
+  readonly proprietaire$ = this.auth.proprietaire$;
+  readonly utilisateur$ = this.auth.utilisateur$;
   readonly alarme = inject(AlarmeIncidentsService);
 
   private router = inject(Router);

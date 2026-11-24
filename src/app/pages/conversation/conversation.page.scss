@@ -1,15 +1,47 @@
 // Discussion inspirée de WhatsApp : fond beige motif, bulles vertes (moi) et blanches (les autres)
 
-$fond: #efeae2;
-$bulle-moi: #d9fdd3;
-$bulle-autre: #ffffff;
-$texte: #111b21;
-$meta: #667781;
+// Palette en variables CSS pour suivre le mode clair / sombre
+:host {
+  --wa-fond: #efeae2;
+  --wa-motif: rgba(0, 0, 0, 0.03);
+  --wa-bulle-moi: #d9fdd3;
+  --wa-bulle-autre: #ffffff;
+  --wa-panneau: #ffffff;
+  --wa-info: #ffeecd;
+  --wa-info-texte: #54656f;
+  --wa-icone: #54656f;
+  --wa-erreur: #fde8e8;
+  --wa-piste: #e9edef;
+  --wa-texte: #111b21;
+  --wa-meta: #667781;
+}
+
+:host-context(html.dark) {
+  // Mêmes fonds noirs que le reste de l'application
+  --wa-fond: var(--app-bg);
+  --wa-motif: rgba(255, 255, 255, 0.03);
+  --wa-bulle-moi: #005c4b;
+  --wa-bulle-autre: var(--app-surface);
+  --wa-panneau: var(--app-surface);
+  --wa-info: var(--app-surface);
+  --wa-info-texte: var(--gd-gold-light);
+  --wa-icone: var(--app-text-secondary);
+  --wa-erreur: rgba(248, 113, 113, 0.15);
+  --wa-piste: var(--app-surface-alt);
+  --wa-texte: var(--app-text);
+  --wa-meta: var(--app-text-secondary);
+}
+
+$fond: var(--wa-fond);
+$bulle-moi: var(--wa-bulle-moi);
+$bulle-autre: var(--wa-bulle-autre);
+$texte: var(--wa-texte);
+$meta: var(--wa-meta);
 $vert: #00a884;
 $bleu-lu: #53bdeb;
 
 :host ::ng-deep .gd-content {
-  --background: #{$fond};
+  --background: var(--wa-fond);
 }
 
 .wa-fond {
@@ -18,8 +50,8 @@ $bleu-lu: #53bdeb;
   background-color: $fond;
   // Motif discret façon papier peint WhatsApp
   background-image:
-    radial-gradient(rgba(0, 0, 0, 0.035) 1.2px, transparent 1.2px),
-    radial-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+    radial-gradient(var(--wa-motif) 1.2px, transparent 1.2px),
+    radial-gradient(var(--wa-motif) 1px, transparent 1px);
   background-size: 22px 22px, 22px 22px;
   background-position: 0 0, 11px 11px;
 }
@@ -36,7 +68,7 @@ $bleu-lu: #53bdeb;
 .wa-jour span {
   padding: 5px 12px;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--wa-panneau);
   color: $meta;
   font-size: 12.5px;
   box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
@@ -61,8 +93,8 @@ $bleu-lu: #53bdeb;
   margin: 4px auto 10px;
   padding: 7px 12px;
   border-radius: 8px;
-  background: #ffeecd;
-  color: #54656f;
+  background: var(--wa-info);
+  color: var(--wa-info-texte);
   font-size: 12px;
   line-height: 1.4;
   text-align: center;
@@ -283,7 +315,7 @@ $bleu-lu: #53bdeb;
   gap: 8px;
   padding: 10px 12px;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--wa-panneau);
   color: $meta;
   font-size: 13px;
   text-align: center;
@@ -298,8 +330,8 @@ $bleu-lu: #53bdeb;
   margin: 0 6px 6px;
   padding: 6px 10px;
   border-radius: 8px;
-  background: #fde8e8;
-  color: #b3182b;
+  background: var(--wa-erreur);
+  color: var(--c-danger);
   font-size: 12.5px;
 }
 
@@ -311,7 +343,7 @@ $bleu-lu: #53bdeb;
   margin: 0 2px 6px;
   padding: 8px;
   border-radius: 12px;
-  background: #ffffff;
+  background: var(--wa-panneau);
 }
 
 .wa-apercu {
@@ -349,7 +381,7 @@ $bleu-lu: #53bdeb;
   bottom: 3px;
   height: 3px;
   border-radius: 3px;
-  background: #e9edef;
+  background: var(--wa-piste);
   overflow: hidden;
 
   div {
@@ -372,7 +404,7 @@ $bleu-lu: #53bdeb;
   min-height: 48px;
   padding: 0 6px 0 16px;
   border-radius: 24px;
-  background: #ffffff;
+  background: var(--wa-panneau);
   box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
 
   ion-textarea {
@@ -398,7 +430,7 @@ $bleu-lu: #53bdeb;
   width: 40px;
   height: 48px;
   flex-shrink: 0;
-  color: #54656f;
+  color: var(--wa-icone);
   font-size: 23px;
 
   &:first-of-type ion-icon {

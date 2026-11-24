@@ -1,8 +1,8 @@
 import { Directive, ElementRef, HostListener, Input, OnChanges } from '@angular/core';
 
 const REPLIS = {
-  avatar: 'assets/gardien/avatar.svg',
-  propriete: 'assets/gardien/propriete.svg'
+  avatar: 'assets/marque/avatar.svg',
+  propriete: 'assets/marque/propriete.svg'
 };
 
 // <img [gdImage]="url" gdRepli="propriete"> : image de remplacement si l'URL est vide ou en erreur

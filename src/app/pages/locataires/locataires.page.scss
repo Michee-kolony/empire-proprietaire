@@ -1,0 +1,68 @@
+.lc-logement {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--app-border);
+
+  &:first-of-type {
+    border-top: none;
+    padding-top: 4px;
+  }
+}
+
+// Numéro du logement : doré quand un locataire l'occupe
+.lc-numero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  background: var(--app-surface-alt);
+  color: var(--app-text-secondary);
+
+  &.occupe {
+    background: linear-gradient(135deg, var(--gd-gold-light), var(--gd-gold));
+    color: #0B0B0C;
+  }
+}
+
+.lc-liberer {
+  background: rgba(230, 57, 70, 0.12);
+  color: var(--c-danger);
+}
+
+.lc-lien {
+  margin-left: auto;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--app-accent);
+  text-decoration: none;
+}
+
+// Accès du locataire à l'application
+.lc-acces {
+  color: var(--app-accent);
+  font-weight: 600;
+}
+
+.lc-section {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 18px 0 4px;
+  font-size: 15px;
+  font-weight: 800;
+
+  ion-icon {
+    color: var(--app-accent);
+  }
+}
+
+.lc-aide {
+  margin: 0 0 10px;
+}

@@ -1,4 +1,4 @@
-@use "theme/gardien.scss";
+@use "theme/commun.scss";
 @use "theme/proprietaire.scss";
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
@@ -19,6 +19,9 @@
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
+/* Mode sombre des composants Ionic, activé par la classe .ion-palette-dark (ThemeService) */
+@import "@ionic/angular/css/palettes/dark.class.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -27,7 +30,7 @@
   --ion-font-family: 'Roboto', sans-serif;
 
   // =====================================================
-  // GARDIEN — Identité visuelle : jaune doré / noir / blanc
+  // EMPIRE SECURITY — Identité visuelle : jaune doré / noir / blanc
   // =====================================================
   --gd-gold: #D4AF37;
   --gd-gold-light: #F2CD5C;
@@ -41,6 +44,27 @@
   --app-text: #111111;
   --app-text-secondary: #6b6b6b;
   --app-border: #E7E2D2;
+  --app-shadow: rgba(0, 0, 0, 0.08);
+  --app-accent: #A8841F;        // texte / icônes dorés lisibles sur le fond
+  // Bloc mis en avant (bouton noir, puce sélectionnée) : texte blanc, icône or
+  --app-strong-bg: #0B0B0C;
+  --app-strong-border: #0B0B0C;
+
+  // Couleurs d'état (texte) — éclaircies en mode sombre
+  --c-success: #16a34a;
+  --c-success-strong: #15803d;
+  --c-danger: #b3182b;
+  --c-warning: #ea580c;
+  --c-warning-strong: #c2410c;
+  --c-info: #2563eb;
+  --c-muted: #6b7280;
+
+  // Texture décorative du fond des pages : nid d'abeille doré + halos (voir .gd-content)
+  --app-motif: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23D4AF37' stroke-opacity='0.16'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23D4AF37' stroke-opacity='0.09'/%3E%3C/svg%3E");
+  --app-halo-1: rgba(212, 175, 55, 0.16);
+  --app-halo-2: rgba(212, 175, 55, 0.10);
+  // Nid d'abeille plein (l'opacité est réglée par l'élément qui l'utilise)
+  --app-motif-carte: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23D4AF37' stroke-width='1.5'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23D4AF37' stroke-width='1.5'/%3E%3C/svg%3E");
 
   // Alignement des couleurs Ionic sur l'identité or / noir
   --ion-color-primary: #D4AF37;
@@ -64,6 +88,53 @@
   --ion-tab-bar-background: #ffffff;
 }
 
+// =====================================================
+// MODE SOMBRE — classe posée sur <html> par ThemeService
+// (html.dark l'emporte sur :root et sur la palette Ionic)
+// =====================================================
+html.dark {
+  --app-bg: #111113;
+  --app-surface: #1B1B1E;
+  --app-surface-alt: #26262A;
+  --app-text: #F2F1EC;
+  --app-text-secondary: #A1A1AA;
+  --app-border: #2E2E33;
+  --app-shadow: rgba(0, 0, 0, 0.45);
+  --app-accent: #D4AF37;
+  --app-strong-bg: #2C2C31;
+  --app-strong-border: var(--gd-gold);
+
+  --c-success: #4ade80;
+  --c-success-strong: #4ade80;
+  --c-danger: #f87171;
+  --c-warning: #fb923c;
+  --c-warning-strong: #fb923c;
+  --c-info: #60a5fa;
+  --c-muted: #a1a1aa;
+
+  --app-motif: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23D4AF37' stroke-opacity='0.09'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23D4AF37' stroke-opacity='0.05'/%3E%3C/svg%3E");
+  --app-halo-1: rgba(212, 175, 55, 0.12);
+  --app-halo-2: rgba(212, 175, 55, 0.07);
+
+  --ion-color-primary: #D4AF37;
+  --ion-color-primary-rgb: 212, 175, 55;
+  --ion-color-primary-contrast: #0B0B0C;
+  --ion-color-primary-contrast-rgb: 11, 11, 12;
+  --ion-color-primary-shade: #A8841F;
+  --ion-color-primary-tint: #F2CD5C;
+
+  --ion-background-color: var(--app-bg);
+  --ion-background-color-rgb: 17, 17, 19;
+  --ion-text-color: var(--app-text);
+  --ion-text-color-rgb: 242, 241, 236;
+  --ion-item-background: var(--app-surface);
+  --ion-card-background: var(--app-surface);
+  --ion-toolbar-background: var(--gd-black);
+  --ion-toolbar-color: #ffffff;
+  --ion-tab-bar-background: var(--app-surface);
+  --ion-overlay-background-color: var(--app-surface);
+}
+
 html,
 body,
 ion-app,
@@ -76,7 +147,7 @@ ion-select {
 }
 
 
-/* GARDIEN — Scrollbars invisibles */
+/* Scrollbars invisibles */
 * {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -100,6 +171,15 @@ ion-content::part(scroll)::-webkit-scrollbar {
 /* Surface commune des pages internes de l'application. */
 ion-content {
   --background: var(--app-bg);
+}
+
+/* Fond décoré des pages internes (ne défile pas avec le contenu) */
+.gd-content {
+  --background:
+    radial-gradient(ellipse 70% 45% at 100% 0%, var(--app-halo-1), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, var(--app-halo-2), transparent 70%),
+    var(--app-motif) center top / 56px 100px repeat,
+    var(--app-bg);
 }
 
 app-login ion-content {

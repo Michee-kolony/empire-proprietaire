@@ -2,6 +2,8 @@ import { Component, Input, ViewChild, inject } from '@angular/core';
 import { IonContent, MenuController } from '@ionic/angular';
 import { Observable } from 'rxjs';
 import { ChatService } from '../../services/chat.service';
+import { ProprietaireAuthService } from '../../services/proprietaire-auth.service';
+import { ThemeService } from '../../services/theme.service';
 
 interface EntreeNav {
   path: string;
@@ -10,7 +12,7 @@ interface EntreeNav {
   badge?: Observable<number>;
 }
 
-// Cadre commun des pages de l'espace propriétaire : en-tête, contenu, barre du bas
+// Cadre commun des pages (espaces propriétaire et locataire) : en-tête, contenu, barre du bas
 @Component({
   selector: 'app-shell',
   templateUrl: './shell.component.html',
@@ -34,14 +36,22 @@ export class ShellComponent {
 
   private menuCtrl = inject(MenuController);
   private chat = inject(ChatService);
+  private auth = inject(ProprietaireAuthService);
+  readonly theme = inject(ThemeService);
 
-  navItems: EntreeNav[] = [
-    { path: '/proprietaire/accueil', icon: 'home', label: 'Accueil' },
-    { path: '/proprietaire/proprietes', icon: 'business', label: 'Propriétés' },
-    { path: '/proprietaire/messages', icon: 'chatbubbles', label: 'Messages', badge: this.chat.nonLus$ },
-    { path: '/proprietaire/carte', icon: 'map', label: 'Carte' },
-    { path: '/proprietaire/incidents', icon: 'warning', label: 'Incidents' }
-  ];
+  navItems: EntreeNav[] = this.auth.espace === 'locataire'
+    ? [
+      { path: '/locataire/accueil', icon: 'home', label: 'Accueil' },
+      { path: '/locataire/messages', icon: 'chatbubbles', label: 'Messages', badge: this.chat.nonLus$ },
+      { path: '/locataire/profil', icon: 'person-circle', label: 'Profil' }
+    ]
+    : [
+      { path: '/proprietaire/accueil', icon: 'home', label: 'Accueil' },
+      { path: '/proprietaire/proprietes', icon: 'business', label: 'Propriétés' },
+      { path: '/proprietaire/messages', icon: 'chatbubbles', label: 'Messages', badge: this.chat.nonLus$ },
+      { path: '/proprietaire/carte', icon: 'map', label: 'Carte' },
+      { path: '/proprietaire/incidents', icon: 'warning', label: 'Incidents' }
+    ];
 
   ouvrirMenu(): void {
     void this.menuCtrl.open('proprietaire');

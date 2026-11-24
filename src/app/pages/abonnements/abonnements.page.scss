@@ -38,7 +38,7 @@
   ion-icon {
     flex-shrink: 0;
     font-size: 16px;
-    color: var(--gd-gold-dark);
+    color: var(--app-accent);
   }
 }
 
@@ -60,7 +60,7 @@
   flex-shrink: 0;
   border-radius: 12px;
   background: rgba(46, 204, 113, 0.12);
-  color: #16a34a;
+  color: var(--c-success);
   font-size: 22px;
 }
 

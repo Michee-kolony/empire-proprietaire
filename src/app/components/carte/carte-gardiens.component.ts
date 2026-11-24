@@ -31,7 +31,7 @@ export interface IncidentCarte {
   lng: number;
 }
 
-const AVATAR_REPLI = 'assets/gardien/avatar.svg';
+const AVATAR_REPLI = 'assets/marque/avatar.svg';
 
 // Carte Leaflet du propriétaire : ses propriétés (avec la zone de présence de 200 m)
 // et UNIQUEMENT les gardiens qui lui sont passés (ceux affectés à ses propriétés).

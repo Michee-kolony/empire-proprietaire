@@ -1,0 +1,100 @@
+.la-profil {
+  text-decoration: none;
+  color: inherit;
+}
+
+// Raccourci vers la messagerie
+.la-messages {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: #0B0B0C;
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 10px 22px rgba(11, 11, 12, 0.18);
+}
+
+.la-messages-icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: var(--gd-gold);
+  color: #0B0B0C;
+  font-size: 21px;
+}
+
+.la-messages-texte {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+
+  strong {
+    font-size: 15.5px;
+  }
+
+  span {
+    color: #a1a1aa;
+    font-size: 12.5px;
+  }
+}
+
+.la-badge {
+  min-width: 22px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #25d366;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.la-fleche {
+  color: #a1a1aa;
+}
+
+.la-logement,
+.la-personne {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.la-personne + .la-personne {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--app-border, rgba(0, 0, 0, 0.08));
+}
+
+.la-photo {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.la-statut {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #71717a;
+  font-size: 12px;
+  font-weight: 700;
+
+  ion-icon {
+    font-size: 8px;
+  }
+
+  &.actif {
+    color: #16a34a;
+  }
+}

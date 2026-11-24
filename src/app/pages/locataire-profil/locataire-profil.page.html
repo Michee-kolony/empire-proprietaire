@@ -1,0 +1,56 @@
+<app-shell title="Mon profil" subtitle="Compte locataire">
+
+  <div class="gd-page" *ngIf="locataire$ | async as l">
+
+    <!-- Identité -->
+    <div class="gd-card gd-profile-card">
+      <img [gdImage]="l.photo" gdRepli="avatar" alt="Votre photo" class="gd-avatar gd-avatar-lg">
+      <div class="gd-profile-info">
+        <h2>{{ nomComplet(l) || l.nom }}</h2>
+        <span class="gd-matricule"><ion-icon name="mail-outline"></ion-icon> {{ l.email }}</span>
+        <span class="gd-status-pill active"><ion-icon name="ellipse"></ion-icon> Locataire</span>
+      </div>
+    </div>
+
+    <!-- Informations (tenues par le propriétaire) -->
+    <div class="gd-card">
+      <h3 class="gd-card-title"><ion-icon name="person-outline"></ion-icon> Informations</h3>
+      <div class="gd-info-row"><span class="gd-label">Nom</span><span class="gd-value">{{ l.nom }}</span></div>
+      <div class="gd-info-row" *ngIf="l.postnom"><span class="gd-label">Postnom</span><span class="gd-value">{{ l.postnom }}</span></div>
+      <div class="gd-info-row" *ngIf="l.prenom"><span class="gd-label">Prénom</span><span class="gd-value">{{ l.prenom }}</span></div>
+      <div class="gd-info-row"><span class="gd-label">Email</span><span class="gd-value">{{ l.email }}</span></div>
+      <div class="gd-info-row" *ngIf="l.telephone"><span class="gd-label">Téléphone</span><span class="gd-value">{{ l.telephone }}</span></div>
+      <div class="gd-info-row" *ngIf="l.createdAt"><span class="gd-label">Accès depuis</span><span class="gd-value">{{ date(l.createdAt) }}</span></div>
+      <p class="gd-hint">Pour corriger ces informations, demandez à votre propriétaire.</p>
+    </div>
+
+    <!-- Mot de passe -->
+    <form class="gd-card" (ngSubmit)="changerMotDePasse()">
+      <h3 class="gd-card-title"><ion-icon name="lock-closed-outline"></ion-icon> Mot de passe</h3>
+      <ion-input class="pr-champ" fill="solid" label="Mot de passe actuel" labelPlacement="stacked"
+        [type]="afficherMotDePasse ? 'text' : 'password'" autocomplete="current-password" name="ancien" [(ngModel)]="ancien" [disabled]="enregistrement"></ion-input>
+      <ion-input class="pr-champ" fill="solid" [label]="'Nouveau mot de passe (' + motDePasseMin + ' caractères min.)'" labelPlacement="stacked"
+        [type]="afficherMotDePasse ? 'text' : 'password'" autocomplete="new-password" name="motDePasse" [(ngModel)]="motDePasse" [disabled]="enregistrement">
+        <ion-button fill="clear" slot="end" (click)="afficherMotDePasse = !afficherMotDePasse" aria-label="Afficher le mot de passe">
+          <ion-icon slot="icon-only" [name]="afficherMotDePasse ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+        </ion-button>
+      </ion-input>
+      <ion-input class="pr-champ" fill="solid" label="Confirmer le mot de passe" labelPlacement="stacked"
+        [type]="afficherMotDePasse ? 'text' : 'password'" autocomplete="new-password" name="confirmation" [(ngModel)]="confirmation" [disabled]="enregistrement"></ion-input>
+      <p class="gd-error" *ngIf="erreur">{{ erreur }}</p>
+      <p class="pr-succes lp-espace" *ngIf="succes"><ion-icon name="checkmark-circle"></ion-icon> {{ succes }}</p>
+      <ion-button type="submit" expand="block" class="btn-dark lp-espace" [disabled]="enregistrement || !motDePasse">
+        <ion-spinner name="crescent" slot="start" *ngIf="enregistrement"></ion-spinner>
+        Changer le mot de passe
+      </ion-button>
+    </form>
+
+    <ion-button expand="block" fill="outline" class="lp-deconnexion" (click)="deconnexion()">
+      <ion-icon name="log-out-outline" slot="start"></ion-icon>
+      Se déconnecter
+    </ion-button>
+
+    <p class="gd-app-version">Empire Security · Espace locataire</p>
+  </div>
+
+</app-shell>

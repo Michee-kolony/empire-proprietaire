@@ -1,6 +1,6 @@
 <ion-app>
-  <!-- Menu latéral du propriétaire (désactivé hors connexion) -->
-  <ion-menu menuId="proprietaire" contentId="main" type="overlay" [disabled]="!(proprietaire$ | async)">
+  <!-- Menu latéral du propriétaire ou du locataire (désactivé hors connexion) -->
+  <ion-menu menuId="proprietaire" contentId="main" type="overlay" [disabled]="!(utilisateur$ | async)">
     <app-menu></app-menu>
   </ion-menu>
 

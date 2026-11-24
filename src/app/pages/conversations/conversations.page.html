@@ -1,4 +1,4 @@
-<app-shell title="Messages" subtitle="Gardiens et administration">
+<app-shell title="Messages" [subtitle]="estLocataire ? 'Propriétaire et gardiens' : 'Gardiens, locataires et administration'">
 
   <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
     <ion-refresher-content></ion-refresher-content>
@@ -11,6 +11,23 @@
       <ion-icon name="search"></ion-icon>
       <input type="search" [(ngModel)]="recherche" placeholder="Rechercher" aria-label="Rechercher une discussion">
     </div>
+
+    <!-- Propriétaire : ses locataires, un toucher pour leur écrire -->
+    <section class="wa-locataires" *ngIf="!estLocataire && locataires.length">
+      <h4>Écrire à un locataire</h4>
+      <div class="wa-locataires-liste">
+        <button type="button" *ngFor="let l of locataires" (click)="ouvrirContact(l)" [disabled]="!!ouverture"
+          [attr.aria-label]="'Écrire à ' + l.nom">
+          <span class="wa-locataire-photo">
+            <img [gdImage]="l.photo" gdRepli="avatar" alt="">
+            <ion-spinner name="crescent" *ngIf="ouverture === l.id"></ion-spinner>
+          </span>
+          <strong>{{ prenom(l.nom) }}</strong>
+          <span>{{ l.logement || l.propriete?.nomReference }}</span>
+        </button>
+      </div>
+      <p class="wa-erreur-contacts" *ngIf="erreurLocataires">{{ erreurLocataires }}</p>
+    </section>
 
     <div class="wa-filtres">
       <button type="button" *ngFor="let f of filtres" [class.actif]="filtre === f.valeur" (click)="filtre = f.valeur">
@@ -40,7 +57,7 @@
     </div>
 
     <ng-container *ngIf="charge && !errorMessage">
-      <a class="wa-ligne" *ngFor="let c of conversationsFiltrees" [routerLink]="['/proprietaire/messages', c._id]" [class.non-lue]="c.nonLus > 0">
+      <a class="wa-ligne" *ngFor="let c of conversationsFiltrees" [routerLink]="[routeMessages, c._id]" [class.non-lue]="c.nonLus > 0">
         <img class="wa-photo" [gdImage]="c.photo" [gdRepli]="c.type === 'propriete' ? 'propriete' : 'avatar'" alt="">
 
         <div class="wa-corps">
@@ -60,12 +77,16 @@
       <div class="wa-vide" *ngIf="!conversationsFiltrees.length">
         <ion-icon name="chatbubbles-outline"></ion-icon>
         <span *ngIf="recherche || filtre !== 'toutes'; else aucune">Aucune discussion ne correspond.</span>
-        <ng-template #aucune><span>Aucune discussion. Touchez le bouton en bas pour écrire à un gardien ou à l'administration.</span></ng-template>
+        <ng-template #aucune>
+          <span *ngIf="estLocataire; else aucuneProprietaire">Aucune discussion. Touchez le bouton en bas pour écrire à votre propriétaire ou à un gardien.</span>
+          <ng-template #aucuneProprietaire><span>Aucune discussion. Touchez le bouton en bas pour écrire à un gardien, un locataire ou à l'administration.</span></ng-template>
+        </ng-template>
       </div>
 
       <p class="wa-mention" *ngIf="conversationsFiltrees.length">
         <ion-icon name="lock-closed"></ion-icon>
-        Vos discussions sont réservées à vos propriétés, vos gardiens et l'administration Empire.
+        <ng-container *ngIf="estLocataire; else mentionProprietaire">Vos discussions sont réservées à votre propriétaire et aux gardiens de votre immeuble.</ng-container>
+        <ng-template #mentionProprietaire>Vos discussions sont réservées à vos propriétés, vos gardiens, vos locataires et l'administration Empire.</ng-template>
       </p>
     </ng-container>
   </div>
@@ -78,7 +99,7 @@
   </ion-fab>
 
   <!-- Choix du correspondant -->
-  <ion-modal [isOpen]="choixOuvert" (didDismiss)="choixOuvert = false" [initialBreakpoint]="0.85" [breakpoints]="[0, 0.85, 1]">
+  <ion-modal class="wa-choix" [isOpen]="choixOuvert" (didDismiss)="choixOuvert = false" [initialBreakpoint]="0.85" [breakpoints]="[0, 0.85, 1]">
     <ng-template>
       <ion-header>
         <ion-toolbar class="wa-modal-toolbar">
@@ -102,7 +123,17 @@
         </ng-container>
 
         <ng-container *ngIf="contactsCharges">
-          <h4 class="wa-groupe" *ngIf="gardiens.length">Vos gardiens en service</h4>
+          <h4 class="wa-groupe" *ngIf="proprietaires.length">Votre propriétaire</h4>
+          <button type="button" class="wa-ligne" *ngFor="let p of proprietaires" (click)="ouvrirContact(p)" [disabled]="!!ouverture">
+            <img class="wa-photo" [gdImage]="p.photo" gdRepli="avatar" alt="">
+            <div class="wa-corps">
+              <strong>{{ p.nom }}</strong>
+              <span class="wa-apercu">{{ role(p.role) }}<ng-container *ngIf="p.propriete"> · {{ p.propriete.nomReference }}</ng-container></span>
+            </div>
+            <ion-spinner name="crescent" *ngIf="ouverture === p.id"></ion-spinner>
+          </button>
+
+          <h4 class="wa-groupe" *ngIf="gardiens.length">{{ estLocataire ? 'Gardiens en service' : 'Vos gardiens en service' }}</h4>
           <button type="button" class="wa-ligne" *ngFor="let g of gardiens" (click)="ouvrirContact(g)" [disabled]="!!ouverture">
             <img class="wa-photo" [gdImage]="g.photo" gdRepli="avatar" alt="">
             <div class="wa-corps">
@@ -114,16 +145,30 @@
             <ion-spinner name="crescent" *ngIf="ouverture === g.id"></ion-spinner>
           </button>
 
-          <h4 class="wa-groupe">Administration Empire</h4>
-          <button type="button" class="wa-ligne" *ngFor="let a of administration" (click)="ouvrirContact(a)" [disabled]="!!ouverture">
-            <div class="wa-photo wa-photo-admin"><ion-icon name="shield-checkmark"></ion-icon></div>
+          <h4 class="wa-groupe" *ngIf="locataires.length">Vos locataires</h4>
+          <button type="button" class="wa-ligne" *ngFor="let l of locataires" (click)="ouvrirContact(l)" [disabled]="!!ouverture">
+            <img class="wa-photo" [gdImage]="l.photo" gdRepli="avatar" alt="">
             <div class="wa-corps">
-              <strong>{{ a.nom }}</strong>
-              <span class="wa-apercu">{{ role(a.role) }}</span>
+              <strong>{{ l.nom }}</strong>
+              <span class="wa-apercu">{{ l.propriete?.nomReference }}<ng-container *ngIf="l.logement"> · {{ l.logement }}</ng-container></span>
             </div>
-            <ion-spinner name="crescent" *ngIf="ouverture === a.id"></ion-spinner>
+            <ion-spinner name="crescent" *ngIf="ouverture === l.id"></ion-spinner>
           </button>
-          <p class="wa-mention" *ngIf="!administration.length">Aucun administrateur disponible.</p>
+
+          <ng-container *ngIf="!estLocataire">
+            <h4 class="wa-groupe">Administration Empire</h4>
+            <button type="button" class="wa-ligne" *ngFor="let a of administration" (click)="ouvrirContact(a)" [disabled]="!!ouverture">
+              <div class="wa-photo wa-photo-admin"><ion-icon name="shield-checkmark"></ion-icon></div>
+              <div class="wa-corps">
+                <strong>{{ a.nom }}</strong>
+                <span class="wa-apercu">{{ role(a.role) }}</span>
+              </div>
+              <ion-spinner name="crescent" *ngIf="ouverture === a.id"></ion-spinner>
+            </button>
+            <p class="wa-mention" *ngIf="!administration.length">Aucun administrateur disponible.</p>
+          </ng-container>
+
+          <p class="wa-mention" *ngIf="estLocataire && !contacts.length">Aucun contact pour le moment : votre propriétaire n'a pas encore de gardien en service.</p>
         </ng-container>
       </ion-content>
     </ng-template>

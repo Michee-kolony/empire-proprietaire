@@ -1,0 +1,120 @@
+<app-shell title="Accueil" subtitle="Espace locataire">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <!-- Profil -->
+    <a class="gd-card gd-profile-card la-profil" routerLink="/locataire/profil" *ngIf="locataire$ | async as l">
+      <img [gdImage]="l.photo" gdRepli="avatar" alt="Votre photo" class="gd-avatar">
+      <div class="gd-profile-info">
+        <span class="gd-matricule">{{ salutation }},</span>
+        <h2>{{ nomComplet(l) || l.nom }}</h2>
+        <span class="gd-status-pill active"><ion-icon name="key"></ion-icon> Locataire</span>
+      </div>
+    </a>
+
+    <!-- Messages -->
+    <a class="la-messages" routerLink="/locataire/messages">
+      <span class="la-messages-icone"><ion-icon name="chatbubbles"></ion-icon></span>
+      <span class="la-messages-texte">
+        <strong>Mes messages</strong>
+        <span>Votre propriétaire et les gardiens</span>
+      </span>
+      <span class="la-badge" *ngIf="nonLus$ | async as n">{{ n > 99 ? '99+' : n }}</span>
+      <ion-icon name="chevron-forward" class="la-fleche"></ion-icon>
+    </a>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !espace">
+      <div class="gd-card" *ngFor="let i of [1, 2]">
+        <ion-skeleton-text [animated]="true" style="width: 55%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <p class="gd-error" *ngIf="erreurChat">{{ erreurChat }}</p>
+
+    <ng-container *ngIf="espace as e">
+
+      <!-- Logement -->
+      <div class="gd-card" *ngIf="e.propriete">
+        <h3 class="gd-card-title"><ion-icon name="home-outline"></ion-icon> Mon logement</h3>
+        <div class="la-logement">
+          <img class="la-photo" [gdImage]="e.propriete.photos[0]" gdRepli="propriete" alt="">
+          <div class="pr-corps">
+            <strong>{{ e.logement?.libelle || 'Logement' }}</strong>
+            <span class="pr-meta"><ion-icon name="business-outline"></ion-icon> {{ e.propriete.nomReference }}</span>
+            <span class="pr-meta" *ngIf="adresse(e.propriete)"><ion-icon name="location-outline"></ion-icon> {{ adresse(e.propriete) }}</span>
+            <span class="pr-meta" *ngIf="e.logement?.dateEntree"><ion-icon name="calendar-outline"></ion-icon> Depuis le {{ date(e.logement?.dateEntree) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Propriétaire -->
+      <div class="gd-card" *ngIf="e.proprietaire as p">
+        <h3 class="gd-card-title"><ion-icon name="person-outline"></ion-icon> Mon propriétaire</h3>
+        <div class="la-personne">
+          <img class="pr-avatar" [gdImage]="p.photo" gdRepli="avatar" alt="">
+          <div class="pr-corps">
+            <strong>{{ nomComplet(p) || p.nom }}</strong>
+            <span class="pr-meta" *ngIf="p.telephone"><ion-icon name="call-outline"></ion-icon> {{ p.telephone }}</span>
+          </div>
+          <div class="pr-actions">
+            <a class="pr-action appel" *ngIf="p.telephone" [href]="lienTel(p.telephone)" aria-label="Appeler le propriétaire">
+              <ion-icon name="call"></ion-icon>
+            </a>
+            <button type="button" class="pr-action" (click)="ecrire(p._id, 'Proprietaire')" [disabled]="!!ouverture" aria-label="Écrire au propriétaire">
+              <ion-spinner name="crescent" *ngIf="ouverture === p._id; else iconeP"></ion-spinner>
+              <ng-template #iconeP><ion-icon name="chatbubble-ellipses"></ion-icon></ng-template>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gardiens en service -->
+      <div class="gd-card">
+        <h3 class="gd-card-title"><ion-icon name="shield-checkmark-outline"></ion-icon> Gardiens de mon immeuble</h3>
+
+        <p class="gd-hint" *ngIf="!e.gardiens.length">Aucun gardien n'est affecté à votre immeuble pour le moment.</p>
+
+        <div class="la-personne" *ngFor="let g of e.gardiens">
+          <img class="pr-avatar" [gdImage]="g.photoProfil" gdRepli="avatar" alt="">
+          <div class="pr-corps">
+            <strong>{{ nomComplet(g) }}</strong>
+            <span class="pr-meta">
+              <ion-icon name="ribbon-outline"></ion-icon> {{ role(g.roleAffectation) }}
+              <ng-container *ngIf="g.heureDebut && g.heureFin"> · {{ heure(g.heureDebut) }} – {{ heure(g.heureFin) }}</ng-container>
+            </span>
+            <div class="pr-badges">
+              <span class="la-statut" [class.actif]="g.statut === 'en service'">
+                <ion-icon name="ellipse"></ion-icon> {{ g.statut === 'en service' ? 'En service' : 'Hors service' }}
+              </span>
+            </div>
+          </div>
+          <div class="pr-actions">
+            <button type="button" class="pr-action" (click)="ecrire(g._id, 'Gardien')" [disabled]="!!ouverture" aria-label="Écrire au gardien">
+              <ion-spinner name="crescent" *ngIf="ouverture === g._id; else iconeG"></ion-spinner>
+              <ng-template #iconeG><ion-icon name="chatbubble-ellipses"></ion-icon></ng-template>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+  </div>
+
+</app-shell>

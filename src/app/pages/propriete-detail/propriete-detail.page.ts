@@ -187,6 +187,7 @@ export class ProprieteDetailPage {
       ['N° de parcelle', p.numeroParcelle],
       ['Bâtiments', p.nombreBatiments],
       ['Niveaux', p.nombreNiveaux],
+      ['Logements', p.nombreLogements],
       ['Chambres', p.nombreChambres],
       ['Portes d\'accès', p.nombrePortesAcces],
       ['Véhicules', p.nombreVehicules]

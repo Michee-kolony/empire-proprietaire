@@ -203,7 +203,7 @@
 
   ion-icon {
     flex-shrink: 0;
-    color: var(--gd-gold-dark);
+    color: var(--app-accent);
   }
 }
 
@@ -230,10 +230,10 @@
   font-weight: 700;
   white-space: nowrap;
 
-  &.actif { background: rgba(46, 204, 113, 0.15); color: #16a34a; }
-  &.expire { background: rgba(230, 57, 70, 0.15); color: #b3182b; }
-  &.aucun { background: rgba(107, 114, 128, 0.15); color: #6b7280; }
-  &.bientot { background: rgba(249, 115, 22, 0.15); color: #ea580c; }
+  &.actif { background: rgba(46, 204, 113, 0.15); color: var(--c-success); }
+  &.expire { background: rgba(230, 57, 70, 0.15); color: var(--c-danger); }
+  &.aucun { background: rgba(107, 114, 128, 0.15); color: var(--c-muted); }
+  &.bientot { background: rgba(249, 115, 22, 0.15); color: var(--c-warning); }
 }
 
 // Rôle d'un gardien sur la propriété
@@ -243,11 +243,11 @@
   font-size: 10.5px;
   font-weight: 700;
   background: rgba(212, 175, 55, 0.18);
-  color: var(--gd-gold-dark);
+  color: var(--app-accent);
 
   &.remplacant {
     background: rgba(107, 114, 128, 0.15);
-    color: #4b5563;
+    color: var(--c-muted);
   }
 }
 
@@ -261,7 +261,7 @@
   font-size: 10.5px;
   font-weight: 700;
   background: rgba(107, 114, 128, 0.15);
-  color: #6b7280;
+  color: var(--c-muted);
 
   ion-icon {
     font-size: 8px;
@@ -269,7 +269,7 @@
 
   &.on {
     background: rgba(46, 204, 113, 0.15);
-    color: #16a34a;
+    color: var(--c-success);
   }
 }
 
@@ -299,13 +299,13 @@
   border-radius: 12px;
   border: none;
   background: var(--app-surface-alt);
-  color: var(--gd-gold-dark);
+  color: var(--app-accent);
   font-size: 19px;
   text-decoration: none;
 
   &.appel {
     background: rgba(46, 204, 113, 0.15);
-    color: #16a34a;
+    color: var(--c-success);
   }
 }
 
@@ -316,7 +316,7 @@
   --border-radius: 10px;
   --padding-start: 12px;
   --padding-end: 12px;
-  --highlight-color-focused: var(--gd-gold-dark);
+  --highlight-color-focused: var(--app-accent);
   margin-bottom: 10px;
   border-radius: 10px;
   font-size: 14px;
@@ -329,7 +329,7 @@
 }
 
 .pr-obligatoire {
-  color: #b3182b;
+  color: var(--c-danger);
 }
 
 .pr-succes {
@@ -341,7 +341,7 @@
   border-radius: 12px;
   font-size: 13px;
   background: rgba(46, 204, 113, 0.12);
-  color: #15803d;
+  color: var(--c-success-strong);
 
   ion-icon {
     flex-shrink: 0;
@@ -360,7 +360,7 @@
   font-weight: 600;
   line-height: 1.4;
   background: rgba(249, 115, 22, 0.12);
-  color: #c2410c;
+  color: var(--c-warning-strong);
   text-decoration: none;
 
   ion-icon {
@@ -370,7 +370,7 @@
 
   &.danger {
     background: rgba(230, 57, 70, 0.12);
-    color: #b3182b;
+    color: var(--c-danger);
   }
 }
 
@@ -390,7 +390,7 @@
   a {
     font-size: 12.5px;
     font-weight: 600;
-    color: var(--gd-gold-dark);
+    color: var(--app-accent);
     text-decoration: none;
   }
 }

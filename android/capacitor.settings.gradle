@@ -8,9 +8,6 @@ project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/
 include ':capacitor-camera'
 project(':capacitor-camera').projectDir = new File('../node_modules/@capacitor/camera/android')
 
-include ':capacitor-geolocation'
-project(':capacitor-geolocation').projectDir = new File('../node_modules/@capacitor/geolocation/android')
-
 include ':capacitor-haptics'
 project(':capacitor-haptics').projectDir = new File('../node_modules/@capacitor/haptics/android')
 
@@ -28,12 +25,3 @@ project(':capacitor-preferences').projectDir = new File('../node_modules/@capaci
 
 include ':capacitor-status-bar'
 project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacitor/status-bar/android')
-
-include ':capawesome-capacitor-google-sign-in'
-project(':capawesome-capacitor-google-sign-in').projectDir = new File('../node_modules/@capawesome/capacitor-google-sign-in/android')
-
-include ':capgo-capacitor-youtube-player'
-project(':capgo-capacitor-youtube-player').projectDir = new File('../node_modules/@capgo/capacitor-youtube-player/android')
-
-include ':capacitor-native-settings'
-project(':capacitor-native-settings').projectDir = new File('../node_modules/capacitor-native-settings/android')

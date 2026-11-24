@@ -53,6 +53,7 @@ export class ConversationPage {
   readonly heure = heureMessage;
   readonly role = roleChat;
   readonly contenuMax = CONTENU_MAX;
+  readonly routeMessages = this.chat.routeMessages;
   readonly photosMax = PHOTOS_MAX;
 
   id = '';

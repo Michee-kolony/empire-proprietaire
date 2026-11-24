@@ -1,16 +1,41 @@
+// Couleurs du formulaire : blanc / noir en clair, surface sombre / or en sombre
+:host {
+  --lg-fond: #ffffff;
+  --lg-texte: #0B0B0C;
+  --lg-texte-doux: #71717a;
+  --lg-placeholder: #a1a1aa;
+  --lg-ligne: #d4d4d8;
+  --lg-accent: #0B0B0C;
+  --lg-btn: #0B0B0C;
+  --lg-btn-actif: #27272a;
+  --lg-btn-texte: #ffffff;
+}
+
+:host-context(html.dark) {
+  --lg-fond: var(--app-bg);
+  --lg-texte: var(--app-text);
+  --lg-texte-doux: #a1a1aa;
+  --lg-placeholder: #71717a;
+  --lg-ligne: #3f3f46;
+  --lg-accent: var(--gd-gold);
+  --lg-btn: var(--gd-gold);
+  --lg-btn-actif: var(--gd-gold-dark);
+  --lg-btn-texte: #0B0B0C;
+}
+
 /* =====================================================
    CONTENT
 ===================================================== */
 
 .login-content {
-  --background: #ffffff;
+  --background: var(--lg-fond);
 }
 
 .login-container {
   min-height: 100%;
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--lg-fond);
 }
 
 /* =====================================================
@@ -68,7 +93,7 @@
   height: 90px;
 
   path {
-    fill: #ffffff;
+    fill: var(--lg-fond);
   }
 }
 
@@ -81,7 +106,7 @@
   display: flex;
   flex-direction: column;
   padding: 4px 28px calc(28px + env(safe-area-inset-bottom));
-  background: #ffffff;
+  background: var(--lg-fond);
 }
 
 .login-titre {
@@ -89,7 +114,7 @@
   align-self: flex-start;
   margin: 0 0 30px;
   padding-bottom: 8px;
-  color: #0B0B0C;
+  color: var(--lg-texte);
   font-size: 30px;
   font-weight: 800;
 
@@ -101,7 +126,7 @@
     width: 64%;
     height: 3px;
     border-radius: 3px;
-    background: #0B0B0C;
+    background: var(--lg-accent);
   }
 }
 
@@ -112,6 +137,48 @@
   gap: 22px;
 }
 
+// Choix de l'espace : propriétaire ou locataire
+.espace {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.espace-choix {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--lg-ligne) 45%, transparent);
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--lg-texte-doux);
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+
+    ion-icon {
+      font-size: 18px;
+    }
+
+    &.actif {
+      background: var(--lg-btn);
+      color: var(--lg-btn-texte);
+      box-shadow: 0 4px 12px rgba(11, 11, 12, 0.18);
+    }
+  }
+}
+
 .champ {
   display: flex;
   flex-direction: column;
@@ -119,7 +186,7 @@
 }
 
 .champ-label {
-  color: #0B0B0C;
+  color: var(--lg-texte);
   font-size: 14px;
   font-weight: 700;
 }
@@ -128,22 +195,22 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  border-bottom: 1.5px solid #d4d4d8;
+  border-bottom: 1.5px solid var(--lg-ligne);
   transition: border-color 0.2s;
 
   &:focus-within {
-    border-bottom-color: #0B0B0C;
+    border-bottom-color: var(--lg-accent);
   }
 
   > ion-icon {
     flex-shrink: 0;
     font-size: 18px;
-    color: #71717a;
+    color: var(--lg-texte-doux);
   }
 
   ion-input {
-    --color: #0B0B0C;
-    --placeholder-color: #a1a1aa;
+    --color: var(--lg-texte);
+    --placeholder-color: var(--lg-placeholder);
     --placeholder-opacity: 1;
     --padding-start: 0;
     --padding-end: 0;
@@ -158,15 +225,15 @@
   padding: 6px 0 6px 6px;
   border: none;
   background: none;
-  color: #a1a1aa;
+  color: var(--lg-placeholder);
   font-size: 19px;
   cursor: pointer;
 }
 
 .btn-login {
-  --background: #0B0B0C;
-  --background-activated: #27272a;
-  --color: #ffffff;
+  --background: var(--lg-btn);
+  --background-activated: var(--lg-btn-actif);
+  --color: var(--lg-btn-texte);
   --border-radius: 12px;
   --box-shadow: 0 10px 22px rgba(11, 11, 12, 0.25);
   margin-top: auto;
@@ -179,8 +246,8 @@
 .login-spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  border-top-color: #ffffff;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
   border-radius: 50%;
   display: inline-block;
   margin-right: 8px;
@@ -194,12 +261,12 @@
 .account-note {
   margin: 0;
   text-align: center;
-  color: #71717a;
+  color: var(--lg-texte-doux);
   font-size: 13px;
   line-height: 1.5;
 
   strong {
-    color: #0B0B0C;
+    color: var(--lg-texte);
   }
 }
 

@@ -11,7 +11,7 @@ def capAppId = readCapValue('appId')
 def capAppName = readCapValue('appName')
 
 android {
-    namespace = "com.empiresecurity.gardien"
+    namespace = "com.empiresecurity.proprietaire"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId capAppId

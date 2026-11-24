@@ -56,7 +56,7 @@ export class AlarmeIncidentsService {
     // Retour au premier plan : vérification immédiate
     if (Capacitor.isNativePlatform()) {
       void App.addListener('resume', () => this.zone.run(() => {
-        if (this.auth.isLoggedIn) void this.verifier();
+        if (this.auth.proprietaire) void this.verifier();
       }));
     }
   }
@@ -68,7 +68,7 @@ export class AlarmeIncidentsService {
 
   // Après une action du propriétaire (incident résolu…) : la sirène s'arrête sans attendre 10 s
   verifierMaintenant(): void {
-    if (this.auth.isLoggedIn) void this.verifier();
+    if (this.auth.proprietaire) void this.verifier();
   }
 
   private async verifier(): Promise<void> {
@@ -78,7 +78,7 @@ export class AlarmeIncidentsService {
     } catch {
       return; // Réseau indisponible : on garde l'état actuel, nouvel essai au prochain tour
     }
-    if (!this.auth.isLoggedIn) return;
+    if (!this.auth.proprietaire) return;
 
     const nouveaux = actifs.filter(i => !this.connus.has(i._id));
     if (!this.premiereVerification) nouveaux.forEach(i => void this.notifier(i));

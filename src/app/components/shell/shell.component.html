@@ -8,16 +8,22 @@
         <img class="gd-header-avatar" *ngIf="avatar !== undefined" [class.carre]="avatarRepli === 'propriete'"
           [gdImage]="avatar" [gdRepli]="avatarRepli" alt="">
         <div class="gd-brand-badge" *ngIf="!retour">
-          <img src="assets/gardien/mark.png" alt="Empire Security">
+          <img src="assets/marque/mark.png" alt="Empire Security">
         </div>
         <div class="gd-brand-text">
           <span class="gd-title">{{ title }}</span>
           <span class="gd-subtitle" *ngIf="subtitle">{{ subtitle }}</span>
         </div>
       </div>
-      <button type="button" class="gd-menu-btn" (click)="ouvrirMenu()" aria-label="Ouvrir le menu">
-        <ion-icon name="menu"></ion-icon>
-      </button>
+      <div class="gd-header-actions">
+        <button type="button" class="gd-menu-btn" (click)="ouvrirMenu()" aria-label="Ouvrir le menu">
+          <ion-icon name="menu"></ion-icon>
+        </button>
+        <button type="button" class="gd-menu-btn" (click)="theme.basculer()"
+          [attr.aria-label]="(theme.theme$ | async) === 'sombre' ? 'Passer en mode clair' : 'Passer en mode sombre'">
+          <ion-icon [name]="(theme.theme$ | async) === 'sombre' ? 'sunny' : 'moon'"></ion-icon>
+        </button>
+      </div>
     </div>
   </ion-toolbar>
 </ion-header>

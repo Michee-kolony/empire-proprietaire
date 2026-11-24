@@ -17,7 +17,7 @@ const DELAI_ENVOI_MS = 5 * 60 * 1000;
 // MODELES (renvoyés par /api/chat, voir backend controllers/chat.js)
 // =====================================================
 
-export type ModeleChat = 'Gardien' | 'Proprietaire' | 'Administrateur';
+export type ModeleChat = 'Gardien' | 'Proprietaire' | 'Administrateur' | 'Locataire';
 
 export interface PersonneChat {
   id: string | null;
@@ -32,6 +32,8 @@ export interface PersonneChat {
 export interface ContactChat extends PersonneChat {
   id: string;
   propriete?: { id: string; nomReference: string };
+  // Locataire : libellé de son logement (ex : « Appartement 3 »)
+  logement?: string;
 }
 
 export interface Conversation {
@@ -145,16 +147,21 @@ export class ChatService {
     this.recalculNonLus.pipe(debounceTime(500)).subscribe(() => void this.rafraichirNonLus());
   }
 
-  // Appelé au démarrage : connexion temps réel tant qu'un propriétaire est connecté
+  // Appelé au démarrage : connexion temps réel tant qu'un propriétaire ou un locataire est connecté
   demarrer(): void {
-    this.auth.proprietaire$.subscribe(proprietaire => {
-      if (proprietaire && this.auth.token) this.connecter(this.auth.token);
+    this.auth.utilisateur$.subscribe(utilisateur => {
+      if (utilisateur && this.auth.token) this.connecter(this.auth.token);
       else this.deconnecter();
     });
   }
 
   get monId(): string {
-    return this.auth.proprietaire?._id ?? '';
+    return this.auth.monId;
+  }
+
+  // Liste des discussions de l'espace connecté (/proprietaire/messages ou /locataire/messages)
+  get routeMessages(): string {
+    return this.auth.espace === 'locataire' ? '/locataire/messages' : '/proprietaire/messages';
   }
 
   // =====================================================
@@ -183,7 +190,7 @@ export class ChatService {
   }
 
   async ouvrirDirecte(contact: Pick<ContactChat, 'id' | 'modele'>): Promise<Conversation> {
-    const modele = { Gardien: 'gardien', Proprietaire: 'proprietaire', Administrateur: 'admin' }[contact.modele];
+    const modele = { Gardien: 'gardien', Proprietaire: 'proprietaire', Administrateur: 'admin', Locataire: 'locataire' }[contact.modele];
     return this.ouvrir({ destinataire: contact.id, destinataireModele: modele });
   }
 

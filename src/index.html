@@ -7,7 +7,7 @@
 
   <base href="/" />
 
-  <meta name="color-scheme" content="light" />
+  <meta name="color-scheme" content="light dark" />
   <meta name="viewport" content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="format-detection" content="telephone=no" />
   <meta name="msapplication-tap-highlight" content="no" />
@@ -22,6 +22,15 @@
   <meta name="apple-mobile-web-app-title" content="Empire Propriétaire" />
   <meta name="application-name" content="Empire Security" />
   <link rel="manifest" href="manifest.webmanifest" />
+  <!-- Thème clair / sombre appliqué avant Angular pour éviter un flash (voir ThemeService) -->
+  <script>
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('es_theme'); } catch (e) {}
+      var sombre = t ? t === 'sombre' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (sombre) document.documentElement.classList.add('dark', 'ion-palette-dark');
+    })();
+  </script>
 </head>
 
 <body>

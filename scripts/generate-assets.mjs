@@ -58,3 +58,9 @@ if (existsSync(res)) {
     }
   }
 }
+
+// iOS : splash par défaut de Capacitor, remplacés par les Default@*.png générés
+const splashIos = 'ios/App/App/Assets.xcassets/Splash.imageset';
+if (existsSync(splashIos)) {
+  for (const f of readdirSync(splashIos).filter((f) => f.startsWith('splash-2732x2732'))) rmSync(join(splashIos, f));
+}

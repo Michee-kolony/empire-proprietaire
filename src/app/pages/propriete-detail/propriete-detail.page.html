@@ -36,7 +36,7 @@
         </button>
       </div>
       <ng-template #sansPhoto>
-        <img class="pd-photo-vide" src="assets/gardien/propriete.svg" alt="">
+        <img class="pd-photo-vide" src="assets/marque/propriete.svg" alt="">
       </ng-template>
 
       <!-- En-tête -->
@@ -71,6 +71,16 @@
         <ion-spinner name="crescent" *ngIf="ouvertureChat"></ion-spinner>
         <ion-icon name="chevron-forward" class="pr-fleche" *ngIf="!ouvertureChat"></ion-icon>
       </button>
+
+      <!-- Logements & sous-comptes locataires -->
+      <a class="gd-card pd-discussion" routerLink="/proprietaire/locataires" [queryParams]="{ propriete: p._id }">
+        <ion-icon name="key-outline"></ion-icon>
+        <div>
+          <strong>Logements &amp; locataires</strong>
+          <span>{{ p.nombreLogements || 1 }} logement{{ (p.nombreLogements || 1) > 1 ? 's' : '' }} · un sous-compte locataire par logement</span>
+        </div>
+        <ion-icon name="chevron-forward" class="pr-fleche"></ion-icon>
+      </a>
 
       <!-- Carte -->
       <div class="gd-card">

@@ -1,22 +1,22 @@
 <ion-content class="gd-mn-content">
   <div class="gd-mn">
 
-    <!-- En-tête : marque + propriétaire connecté -->
+    <!-- En-tête : marque + compte connecté -->
     <div class="gd-mn-tete">
       <div class="gd-mn-marque">
-        <div class="gd-brand-badge"><img src="assets/gardien/mark.png" alt=""></div>
+        <div class="gd-brand-badge"><img src="assets/marque/mark.png" alt=""></div>
         <span>Empire Security</span>
       </div>
 
-      <ion-menu-toggle [autoHide]="false" *ngIf="proprietaire$ | async as p">
-        <a class="gd-mn-profil" routerLink="/proprietaire/profil">
+      <ion-menu-toggle [autoHide]="false" *ngIf="utilisateur$ | async as p">
+        <a class="gd-mn-profil" [routerLink]="(espace$ | async) === 'locataire' ? '/locataire/profil' : '/proprietaire/profil'">
           <img [gdImage]="p.photo" gdRepli="avatar" alt="Votre photo" class="gd-avatar">
           <div class="gd-mn-identite">
             <strong>{{ nomComplet(p) }}</strong>
-            <span>{{ p.telephone }}</span>
+            <span>{{ contact(p) }}</span>
             <span class="gd-status-pill active">
               <ion-icon name="ellipse"></ion-icon>
-              {{ role(p.role) }}
+              {{ role($any(p.role)) }}
             </span>
           </div>
         </a>
@@ -25,7 +25,7 @@
 
     <!-- Navigation -->
     <nav class="gd-mn-nav">
-      <section *ngFor="let s of sections">
+      <section *ngFor="let s of sections$ | async">
         <h4>{{ s.titre }}</h4>
         <ion-menu-toggle [autoHide]="false" *ngFor="let e of s.entrees">
           <a class="gd-mn-lien" [routerLink]="e.path" routerLinkActive="active" routerDirection="root">
@@ -44,7 +44,7 @@
         <ion-icon name="log-out-outline"></ion-icon>
         Se déconnecter
       </button>
-      <p>Empire Security · Espace propriétaire</p>
+      <p>Empire Security · Espace {{ (espace$ | async) === 'locataire' ? 'locataire' : 'propriétaire' }}</p>
     </div>
 
   </div>

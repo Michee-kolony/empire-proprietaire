@@ -76,6 +76,12 @@
   color: var(--gd-gold-light);
 }
 
+.gd-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
 .gd-menu-btn {
   display: flex;
   align-items: center;
@@ -103,7 +109,7 @@
 ===================================================== */
 
 .gd-content {
-  --background: var(--app-bg);
+  // Fond décoré : défini dans global.scss
   flex: 1 1 auto;
   height: auto;
   min-height: 0;
@@ -125,10 +131,10 @@
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: #ffffff;
+  background: var(--app-surface);
   border-top: 1px solid var(--app-border);
   padding: 8px 6px calc(8px + env(safe-area-inset-bottom));
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 -4px 16px var(--app-shadow);
 }
 
 .gd-nav-item {
@@ -157,11 +163,11 @@
 }
 
 .gd-nav-item.active {
-  color: var(--gd-gold-dark);
+  color: var(--app-accent);
 }
 
 .gd-nav-item.active .gd-nav-icon {
-  color: var(--gd-gold-dark);
+  color: var(--app-accent);
 }
 
 .gd-nav-icon {
@@ -183,7 +189,7 @@
   font-weight: 700;
   line-height: 17px;
   text-align: center;
-  border: 2px solid #ffffff;
+  border: 2px solid var(--app-surface);
   box-sizing: content-box;
 }
 

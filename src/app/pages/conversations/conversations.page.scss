@@ -1,19 +1,54 @@
 // Liste des discussions inspirée de WhatsApp
 
-$vert: #00a884;
-$vert-clair: #d9fdd3;
-$texte: #111b21;
-$meta: #667781;
-$separateur: #e9edef;
+// Palette en variables CSS pour suivre le mode clair / sombre.
+// Aussi posée sur la modale (.wa-choix), qu'Ionic déplace hors de la page à l'ouverture.
+@mixin palette-claire {
+  --wa-fond: #ffffff;
+  --wa-champ: #f0f2f5;
+  --wa-champ-texte: #54656f;
+  --wa-filtre-actif: #d9fdd3;
+  --wa-filtre-actif-texte: #008069;
+  --wa-appui: #f5f6f6;
+  --wa-photo: #dfe5e7;
+  --wa-texte: #111b21;
+  --wa-meta: #667781;
+  --wa-separateur: #e9edef;
+  --wa-vert-lien: #1fa855;
+  --wa-vide-icone: #c4ccd0;
+}
+
+// Mode sombre : mêmes fonds noirs que le reste de l'application
+@mixin palette-sombre {
+  --wa-fond: var(--app-bg);
+  --wa-champ: var(--app-surface);
+  --wa-champ-texte: var(--app-text-secondary);
+  --wa-filtre-actif: rgba(212, 175, 55, 0.15);
+  --wa-filtre-actif-texte: var(--gd-gold);
+  --wa-appui: var(--app-surface);
+  --wa-photo: var(--app-surface-alt);
+  --wa-texte: var(--app-text);
+  --wa-meta: var(--app-text-secondary);
+  --wa-separateur: var(--app-border);
+  --wa-vert-lien: #25d366;
+  --wa-vide-icone: #3f3f46;
+}
+
+:host, ion-modal.wa-choix { @include palette-claire; }
+:host-context(html.dark) { @include palette-sombre; }
+::ng-deep html.dark ion-modal.wa-choix { @include palette-sombre; }
+
+$texte: var(--wa-texte);
+$meta: var(--wa-meta);
+$separateur: var(--wa-separateur);
 
 :host ::ng-deep .gd-content {
-  --background: #ffffff;
+  --background: var(--wa-fond);
 }
 
 .wa-liste {
   min-height: 100%;
   padding-bottom: 90px;
-  background: #ffffff;
+  background: var(--wa-fond);
 }
 
 /* ---------- Recherche et filtres ---------- */
@@ -26,7 +61,7 @@ $separateur: #e9edef;
   padding: 0 14px;
   height: 42px;
   border-radius: 21px;
-  background: #f0f2f5;
+  background: var(--wa-champ);
   color: $meta;
 
   ion-icon {
@@ -61,15 +96,15 @@ $separateur: #e9edef;
     padding: 6px 14px;
     border: none;
     border-radius: 999px;
-    background: #f0f2f5;
-    color: #54656f;
+    background: var(--wa-champ);
+    color: var(--wa-champ-texte);
     font: inherit;
     font-size: 13.5px;
     font-weight: 500;
 
     &.actif {
-      background: $vert-clair;
-      color: #008069;
+      background: var(--wa-filtre-actif);
+      color: var(--wa-filtre-actif-texte);
     }
   }
 }
@@ -90,7 +125,7 @@ $separateur: #e9edef;
   text-decoration: none;
 
   &:active {
-    background: #f5f6f6;
+    background: var(--wa-appui);
   }
 
   &:disabled {
@@ -105,7 +140,7 @@ $separateur: #e9edef;
   margin: 0;
   border-radius: 50%;
   object-fit: cover;
-  background: #dfe5e7;
+  background: var(--wa-photo);
 }
 
 .wa-photo-admin {
@@ -196,7 +231,7 @@ $separateur: #e9edef;
 
 .wa-ligne.non-lue {
   .wa-date {
-    color: #1fa855;
+    color: var(--wa-vert-lien);
     font-weight: 500;
   }
 
@@ -219,7 +254,7 @@ $separateur: #e9edef;
 
   ion-icon {
     font-size: 44px;
-    color: #c4ccd0;
+    color: var(--wa-vide-icone);
   }
 }
 
@@ -245,6 +280,14 @@ $separateur: #e9edef;
   height: 56px;
 }
 
+// Mode sombre : bouton doré pour ressortir sur le fond noir
+:host-context(html.dark) .wa-fab {
+  --background: linear-gradient(135deg, var(--gd-gold-light), var(--gd-gold));
+  --background-activated: var(--gd-gold-dark);
+  --color: #0B0B0C;
+  --box-shadow: 0 6px 16px rgba(212, 175, 55, 0.3);
+}
+
 /* ---------- Choix du correspondant ---------- */
 
 .wa-modal-toolbar {
@@ -264,7 +307,7 @@ $separateur: #e9edef;
 }
 
 .wa-modal {
-  --background: #ffffff;
+  --background: var(--wa-fond);
 }
 
 .wa-groupe {
@@ -276,6 +319,89 @@ $separateur: #e9edef;
 
 .wa-erreur-contacts {
   margin: 12px 16px;
-  color: #b3182b;
+  color: var(--c-danger);
   font-size: 13px;
+}
+
+// Locataires du propriétaire, affichés en haut de la liste (un toucher pour leur écrire)
+.wa-locataires {
+  padding: 4px 0 10px;
+
+  h4 {
+    margin: 0 0 8px;
+    padding: 0 14px;
+    color: var(--wa-champ-texte);
+    font-size: 12.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+}
+
+.wa-locataires-liste {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  padding: 0 14px 2px;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 3px;
+    width: 68px;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    strong,
+    span {
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    strong {
+      font-size: 13px;
+    }
+
+    span {
+      color: var(--wa-champ-texte);
+      font-size: 11px;
+    }
+  }
+}
+
+.wa-locataire-photo {
+  position: relative;
+  display: block;
+  width: 58px;
+  height: 58px;
+  padding: 2px;
+  border: 2px solid var(--gd-gold);
+  border-radius: 50%;
+
+  img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  ion-spinner {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    color: var(--gd-gold);
+  }
 }

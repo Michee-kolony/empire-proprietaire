@@ -1,4 +1,4 @@
-<app-shell [title]="titre" [subtitle]="ecrit || sousTitre" retour="/proprietaire/messages" [sansNav]="true"
+<app-shell [title]="titre" [subtitle]="ecrit || sousTitre" [retour]="routeMessages" [sansNav]="true"
   [avatar]="conversation?.photo ?? ''" [avatarRepli]="conversation?.type === 'propriete' ? 'propriete' : 'avatar'">
 
   <div class="wa-fond">

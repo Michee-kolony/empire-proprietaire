@@ -1,8 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { ProprietaireAuthService } from '../../services/proprietaire-auth.service';
+import { Preferences } from '@capacitor/preferences';
+import { Espace, ProprietaireAuthService } from '../../services/proprietaire-auth.service';
 
-// Connexion du propriétaire : POST /api/proprietaires/login (téléphone ou email + mot de passe)
+// Dernier espace choisi, proposé à la prochaine connexion
+const ESPACE_KEY = 'login_espace';
+
+// Connexion : l'utilisateur choisit d'abord son espace
+// - propriétaire : POST /api/proprietaires/login (téléphone ou email + mot de passe)
+// - locataire : POST /api/locataires/login (email + mot de passe donnés par son propriétaire)
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -13,6 +19,8 @@ export class LoginPage {
 
   private auth = inject(ProprietaireAuthService);
   private router = inject(Router);
+
+  espace: Espace = 'proprietaire';
 
   loginData = {
     identifiant: '',
@@ -32,6 +40,15 @@ export class LoginPage {
   ionViewWillEnter(): void {
     const message = this.auth.lireMessageConnexion();
     if (message) this.showErrorToast(message);
+    void Preferences.get({ key: ESPACE_KEY }).then(({ value }) => {
+      if (value === 'proprietaire' || value === 'locataire') this.espace = value;
+    });
+  }
+
+  choisirEspace(espace: Espace): void {
+    if (this.isLoading) return;
+    this.espace = espace;
+    void Preferences.set({ key: ESPACE_KEY, value: espace });
   }
 
   togglePasswordVisibility(): void {
@@ -43,7 +60,9 @@ export class LoginPage {
     const password = this.loginData.password;
 
     if (!identifiant) {
-      this.showErrorToast('Saisissez votre téléphone ou votre adresse email.');
+      this.showErrorToast(this.espace === 'locataire'
+        ? 'Saisissez l\'adresse email donnée par votre propriétaire.'
+        : 'Saisissez votre téléphone ou votre adresse email.');
       return;
     }
     if (!password) {
@@ -53,10 +72,12 @@ export class LoginPage {
 
     this.isLoading = true;
     try {
-      const proprietaire = await this.auth.login(identifiant, password);
-      this.showSuccessToast(`Bienvenue, ${proprietaire.prenom || proprietaire.nom} !`);
+      const compte = this.espace === 'locataire'
+        ? await this.auth.loginLocataire(identifiant, password)
+        : await this.auth.login(identifiant, password);
+      this.showSuccessToast(`Bienvenue, ${compte.prenom || compte.nom} !`);
       this.loginData.password = '';
-      setTimeout(() => this.router.navigateByUrl('/proprietaire/accueil', { replaceUrl: true }), 500);
+      setTimeout(() => this.router.navigateByUrl(this.auth.accueil, { replaceUrl: true }), 500);
     } catch (error) {
       this.showErrorToast((error as Error).message);
     } finally {

@@ -1,0 +1,140 @@
+<app-shell [title]="titre" [subtitle]="charge ? occupes + ' / ' + sousComptes.length + ' logement' + (sousComptes.length > 1 ? 's' : '') + ' occupé' + (occupes > 1 ? 's' : '') : ''"
+  [retour]="propriete ? '/proprietaire/proprietes/' + propriete : ''">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <p class="pr-succes" *ngIf="messageSucces"><ion-icon name="checkmark-circle"></ion-icon> {{ messageSucces }}</p>
+
+    <ion-segment [value]="filtre" (ionChange)="onFiltre($any($event))" *ngIf="sousComptes.length > 0">
+      <ion-segment-button value="tous"><ion-label>Tous ({{ sousComptes.length }})</ion-label></ion-segment-button>
+      <ion-segment-button value="occupe"><ion-label>Occupés ({{ occupes }})</ion-label></ion-segment-button>
+      <ion-segment-button value="libre"><ion-label>Libres ({{ sousComptes.length - occupes }})</ion-label></ion-segment-button>
+    </ion-segment>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="gd-card" *ngFor="let i of [1, 2, 3]">
+        <ion-skeleton-text [animated]="true" style="width: 60%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 85%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- Vide -->
+    <div class="gd-empty" *ngIf="charge && !errorMessage && sousComptes.length === 0">
+      <ion-icon name="key-outline"></ion-icon>
+      <span>Aucun logement pour le moment. Les logements de vos propriétés sont déclarés par Empire Security.</span>
+    </div>
+
+    <div class="gd-card" *ngFor="let g of groupes">
+      <h3 class="gd-card-title">
+        <ion-icon name="business-outline"></ion-icon> {{ g.nom }}
+        <a class="lc-lien" *ngIf="!propriete" [routerLink]="['/proprietaire/proprietes', g.id]">Voir</a>
+      </h3>
+
+      <div class="lc-logement" *ngFor="let s of g.logements">
+        <span class="lc-numero" [class.occupe]="s.statut === 'occupe'">{{ s.numero }}</span>
+        <div class="pr-corps">
+          <strong>{{ s.libelle }}</strong>
+          <ng-container *ngIf="s.statut === 'occupe'; else libre">
+            <span class="pr-meta"><ion-icon name="person-outline"></ion-icon> {{ nom(s) }}</span>
+            <span class="pr-meta" *ngIf="s.telephone"><ion-icon name="call-outline"></ion-icon> {{ s.telephone }}</span>
+            <span class="pr-meta" *ngIf="s.dateEntree"><ion-icon name="calendar-outline"></ion-icon> Depuis le {{ date(s.dateEntree) }}</span>
+            <span class="pr-meta lc-acces" *ngIf="s.locataire; else sansAcces"><ion-icon name="phone-portrait-outline"></ion-icon> Accès app : {{ s.locataire.email }}</span>
+            <ng-template #sansAcces><span class="pr-meta"><ion-icon name="lock-closed-outline"></ion-icon> Pas d'accès à l'application</span></ng-template>
+          </ng-container>
+          <ng-template #libre>
+            <div class="pr-badges"><span class="pr-abo aucun">Libre</span></div>
+          </ng-template>
+        </div>
+        <div class="pr-actions">
+          <a class="pr-action appel" *ngIf="s.telephone" [href]="lienTel(s.telephone)" aria-label="Appeler le locataire">
+            <ion-icon name="call"></ion-icon>
+          </a>
+          <button type="button" class="pr-action" *ngIf="s.locataire" (click)="ecrire(s)" [disabled]="!!ouvertureChat" aria-label="Écrire au locataire">
+            <ion-spinner name="crescent" *ngIf="ouvertureChat === s._id; else iconeChat"></ion-spinner>
+            <ng-template #iconeChat><ion-icon name="chatbubble-ellipses"></ion-icon></ng-template>
+          </button>
+          <button type="button" class="pr-action" (click)="ouvrir(s)" [attr.aria-label]="s.statut === 'occupe' ? 'Modifier le locataire' : 'Ajouter un locataire'">
+            <ion-icon [name]="s.statut === 'occupe' ? 'create-outline' : 'person-add-outline'"></ion-icon>
+          </button>
+          <button type="button" class="pr-action lc-liberer" *ngIf="s.statut === 'occupe'" (click)="liberer(s)" aria-label="Libérer le logement">
+            <ion-icon name="exit-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="gd-hint" *ngIf="charge && sousComptes.length > 0">
+      Chaque logement a son sous-compte : inscrivez-y votre locataire. Avec un email et un mot de passe, il se connecte
+      à l'application (choix « Locataire ») pour vous écrire, ainsi qu'aux gardiens en service.
+      Pour ajouter ou retirer des logements, contactez Empire Security.
+    </p>
+
+  </div>
+
+  <!-- Inscription / modification du locataire -->
+  <ion-modal [isOpen]="!!enEdition" (didDismiss)="fermer()" [canDismiss]="!enregistrement">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>{{ enEdition?.statut === 'occupe' ? 'Modifier le locataire' : 'Ajouter un locataire' }}</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="fermer()" [disabled]="enregistrement" aria-label="Fermer"><ion-icon slot="icon-only" name="close"></ion-icon></ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="ion-padding">
+        <form (ngSubmit)="enregistrer()">
+          <ion-input class="pr-champ" fill="solid" label="Libellé du logement" labelPlacement="stacked" name="libelle" [(ngModel)]="champs.libelle" [disabled]="enregistrement"></ion-input>
+          <ion-input class="pr-champ" fill="solid" label="Nom *" labelPlacement="stacked" name="nom" [(ngModel)]="champs.nom" [disabled]="enregistrement"></ion-input>
+          <div class="pr-grille-2">
+            <ion-input class="pr-champ" fill="solid" label="Postnom" labelPlacement="stacked" name="postnom" [(ngModel)]="champs.postnom" [disabled]="enregistrement"></ion-input>
+            <ion-input class="pr-champ" fill="solid" label="Prénom" labelPlacement="stacked" name="prenom" [(ngModel)]="champs.prenom" [disabled]="enregistrement"></ion-input>
+          </div>
+          <ion-input class="pr-champ" fill="solid" label="Téléphone (facultatif)" labelPlacement="stacked" type="tel" inputmode="tel" name="telephone"
+            [(ngModel)]="champs.telephone" [disabled]="enregistrement"></ion-input>
+          <ion-input class="pr-champ" fill="solid" label="Date d'entrée" labelPlacement="stacked" type="date" name="dateEntree"
+            [(ngModel)]="champs.dateEntree" [disabled]="enregistrement"></ion-input>
+
+          <!-- Accès du locataire à l'application (chat avec vous et les gardiens) -->
+          <h4 class="lc-section"><ion-icon name="phone-portrait-outline"></ion-icon> Accès à l'application</h4>
+          <p class="gd-hint lc-aide">
+            Le locataire se connecte avec cet email et ce mot de passe en choisissant « Locataire ».
+            Laissez l'email vide pour ne pas lui donner d'accès.
+          </p>
+          <ion-input class="pr-champ" fill="solid" label="Email du locataire" labelPlacement="stacked" type="email" inputmode="email"
+            autocomplete="off" autocapitalize="off" name="email" [(ngModel)]="champs.email" [disabled]="enregistrement"></ion-input>
+          <ion-input class="pr-champ" fill="solid" labelPlacement="stacked" name="password" autocomplete="new-password"
+            [label]="enEdition?.locataire ? 'Nouveau mot de passe (vide = inchangé)' : 'Mot de passe (' + motDePasseMin + ' caractères min.)'"
+            [type]="afficherMotDePasse ? 'text' : 'password'" [(ngModel)]="champs.password" [disabled]="enregistrement || !champs.email.trim()">
+            <ion-button fill="clear" slot="end" (click)="afficherMotDePasse = !afficherMotDePasse" aria-label="Afficher le mot de passe">
+              <ion-icon slot="icon-only" [name]="afficherMotDePasse ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
+          </ion-input>
+
+          <p class="gd-error" *ngIf="erreurFormulaire">{{ erreurFormulaire }}</p>
+
+          <ion-button type="submit" expand="block" class="btn-gold" [disabled]="enregistrement">
+            <ion-spinner name="crescent" slot="start" *ngIf="enregistrement"></ion-spinner>
+            Enregistrer
+          </ion-button>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+</app-shell>

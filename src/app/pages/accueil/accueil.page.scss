@@ -31,10 +31,10 @@
     }
   }
 
-  .ac-on strong { color: #16a34a; }
-  .ac-on ion-icon { color: #16a34a; }
-  .ac-alerte strong { color: #b3182b; }
-  .ac-alerte ion-icon { color: #b3182b; }
+  .ac-on strong { color: var(--c-success); }
+  .ac-on ion-icon { color: var(--c-success); }
+  .ac-alerte strong { color: var(--c-danger); }
+  .ac-alerte ion-icon { color: var(--c-danger); }
 }
 
 .ac-actions {
@@ -75,6 +75,11 @@
     background: linear-gradient(135deg, #e63946, #b3182b);
     color: #ffffff;
   }
+}
+
+// Mode sombre : carré d'icône assorti aux cartes (le rouge « danger » est conservé)
+:host-context(html.dark) .ac-action:not(.danger) span {
+  background: var(--app-surface-alt);
 }
 
 .ac-vide {
@@ -173,7 +178,7 @@
     color: var(--app-text-secondary);
 
     ion-icon {
-      color: var(--gd-gold-dark);
+      color: var(--app-accent);
     }
   }
 }
@@ -187,6 +192,6 @@
   flex-shrink: 0;
   border-radius: 12px;
   background: rgba(230, 57, 70, 0.1);
-  color: #b3182b;
+  color: var(--c-danger);
   font-size: 24px;
 }

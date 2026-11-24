@@ -9,7 +9,7 @@
     <div class="login-hero">
       <div class="hero-brand">
         <img src="assets/logo.png" alt="Empire Security" class="brand-logo-img">
-        <span class="brand-pill">Espace Propriétaire</span>
+        <span class="brand-pill">{{ espace === 'locataire' ? 'Espace Locataire' : 'Espace Propriétaire' }}</span>
       </div>
 
       <svg class="hero-vague" viewBox="0 0 400 90" preserveAspectRatio="none" aria-hidden="true">
@@ -26,15 +26,33 @@
 
       <div class="login-form">
 
+        <!-- ESPACE : propriétaire ou locataire -->
+        <div class="espace" role="radiogroup" aria-label="Se connecter en tant que">
+          <span class="champ-label">Je me connecte en tant que</span>
+          <div class="espace-choix">
+            <button type="button" role="radio" [attr.aria-checked]="espace === 'proprietaire'"
+              [class.actif]="espace === 'proprietaire'" (click)="choisirEspace('proprietaire')" [disabled]="isLoading">
+              <ion-icon name="business-outline"></ion-icon>
+              Propriétaire
+            </button>
+            <button type="button" role="radio" [attr.aria-checked]="espace === 'locataire'"
+              [class.actif]="espace === 'locataire'" (click)="choisirEspace('locataire')" [disabled]="isLoading">
+              <ion-icon name="key-outline"></ion-icon>
+              Locataire
+            </button>
+          </div>
+        </div>
+
         <!-- IDENTIFIANT -->
         <label class="champ">
-          <span class="champ-label">Téléphone ou email</span>
+          <span class="champ-label">{{ espace === 'locataire' ? 'Email' : 'Téléphone ou email' }}</span>
           <span class="champ-ligne">
-            <ion-icon name="person-outline"></ion-icon>
+            <ion-icon [name]="espace === 'locataire' ? 'mail-outline' : 'person-outline'"></ion-icon>
             <ion-input
-              placeholder="ex. 0812345678"
+              [placeholder]="espace === 'locataire' ? 'ex. nom@exemple.com' : 'ex. 0812345678'"
               [(ngModel)]="loginData.identifiant"
-              type="text"
+              [type]="espace === 'locataire' ? 'email' : 'text'"
+              [inputmode]="espace === 'locataire' ? 'email' : 'text'"
               autocomplete="username"
               autocapitalize="off"
               [disabled]="isLoading"
@@ -76,8 +94,11 @@
         </ion-button>
 
         <!-- INFO COMPTE -->
-        <p class="account-note">
+        <p class="account-note" *ngIf="espace === 'proprietaire'">
           Pas de compte ? <strong>Contactez Empire Security</strong>, qui crée votre compte propriétaire.
+        </p>
+        <p class="account-note" *ngIf="espace === 'locataire'">
+          Votre email et votre mot de passe vous sont donnés par <strong>votre propriétaire</strong>.
         </p>
       </div>
     </div>

@@ -1,0 +1,130 @@
+<app-shell title="Évaluations" subtitle="Appréciation mensuelle des gardiens">
+
+  <ion-refresher slot="fixed" (ionRefresh)="actualiser($any($event))">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="gd-page">
+
+    <!-- Rédiger / corriger son évaluation -->
+    <div class="gd-card ev-form">
+      <button type="button" class="ev-form-tete" (click)="formulaireOuvert = !formulaireOuvert" [attr.aria-expanded]="formulaireOuvert">
+        <ion-icon name="create-outline"></ion-icon>
+        <span>Évaluer un gardien</span>
+        <ion-icon class="ev-chevron" [name]="formulaireOuvert ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </button>
+
+      <div class="ev-form-corps" *ngIf="formulaireOuvert">
+        <p class="ev-aide" *ngIf="!couples.length">
+          Aucun gardien actuellement affecté à vos propriétés : l'évaluation sera possible dès qu'un gardien y sera en poste.
+        </p>
+
+        <ng-container *ngIf="couples.length">
+          <ion-select label="Propriété" labelPlacement="stacked" interface="action-sheet" cancelText="Annuler"
+            [value]="formulaire.propriete" (ionChange)="champ('propriete', $any($event))">
+            <ion-select-option value="">Choisir…</ion-select-option>
+            <ion-select-option *ngFor="let p of proprietesFormulaire" [value]="p.id">{{ p.nom }}</ion-select-option>
+          </ion-select>
+
+          <ion-select label="Gardien" labelPlacement="stacked" interface="action-sheet" cancelText="Annuler"
+            [disabled]="!formulaire.propriete" [value]="formulaire.gardien" (ionChange)="champ('gardien', $any($event))">
+            <ion-select-option value="">Choisir…</ion-select-option>
+            <ion-select-option *ngFor="let c of gardiensDuSite" [value]="c.gardienId">{{ c.gardienNom }}</ion-select-option>
+          </ion-select>
+
+          <ion-select label="Mois évalué" labelPlacement="stacked" interface="action-sheet" cancelText="Annuler"
+            [value]="formulaire.periode" (ionChange)="champ('periode', $any($event))">
+            <ion-select-option *ngFor="let m of mois" [value]="m.valeur">{{ m.libelle }}</ion-select-option>
+          </ion-select>
+
+          <ion-textarea label="Appréciation" labelPlacement="stacked" [autoGrow]="true" [rows]="4" maxlength="3000"
+            placeholder="Ponctualité, vigilance, comportement, présentation…" [value]="formulaire.commentaire"
+            (ionInput)="champ('commentaire', $any($event))"></ion-textarea>
+
+          <ion-button expand="block" class="btn-gold" [disabled]="!peutEnregistrer || enregistrement" (click)="enregistrer()">
+            <ion-spinner *ngIf="enregistrement" name="crescent" slot="start"></ion-spinner>
+            <ion-icon *ngIf="!enregistrement" name="checkmark-circle-outline" slot="start"></ion-icon>
+            Enregistrer l'évaluation
+          </ion-button>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- Filtre mois -->
+    <div class="gd-card ev-filtre">
+      <ion-select label="Mois" labelPlacement="fixed" interface="action-sheet" cancelText="Annuler"
+        [value]="periodeFiltre" (ionChange)="changerMois($any($event))">
+        <ion-select-option value="">Tous les mois</ion-select-option>
+        <ion-select-option *ngFor="let m of mois" [value]="m.valeur">{{ m.libelle }}</ion-select-option>
+      </ion-select>
+    </div>
+
+    <!-- Chargement -->
+    <ng-container *ngIf="isLoading && !charge">
+      <div class="gd-card" *ngFor="let i of [1, 2]">
+        <ion-skeleton-text [animated]="true" style="width: 55%; height: 18px"></ion-skeleton-text>
+        <ion-skeleton-text [animated]="true" style="width: 80%"></ion-skeleton-text>
+      </div>
+    </ng-container>
+
+    <!-- Erreur -->
+    <div class="gd-empty" *ngIf="!isLoading && errorMessage">
+      <ion-icon name="cloud-offline-outline"></ion-icon>
+      <span>{{ errorMessage }}</span>
+      <ion-button fill="outline" class="btn-outline-gold" (click)="charger()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Réessayer
+      </ion-button>
+    </div>
+
+    <!-- Vide -->
+    <div class="gd-empty" *ngIf="charge && !isLoading && !errorMessage && fiches.length === 0">
+      <ion-icon name="star-outline"></ion-icon>
+      <span>Aucune évaluation pour l'instant.</span>
+    </div>
+
+    <!-- Liste -->
+    <ng-container *ngIf="!errorMessage">
+      <div class="gd-card ev-carte" *ngFor="let f of fiches">
+        <div class="ev-tete">
+          <img [gdImage]="f.gardien?.photoProfil" gdRepli="avatar" alt="" class="pr-avatar">
+          <div class="ev-corps">
+            <strong>{{ nomComplet(f.gardien) || 'Gardien' }}</strong>
+            <span class="ev-meta"><ion-icon name="business-outline"></ion-icon> {{ f.propriete?.nomReference }}</span>
+            <span class="ev-meta"><ion-icon name="calendar-outline"></ion-icon> {{ moisLabel(f.periode) }}</span>
+          </div>
+        </div>
+
+        <!-- Appréciation du propriétaire -->
+        <div class="ev-bloc proprietaire">
+          <div class="ev-bloc-tete">
+            <strong><ion-icon name="shield-checkmark-outline"></ion-icon> Votre appréciation</strong>
+            <button type="button" class="ev-modifier" (click)="modifier(f)">
+              <ion-icon [name]="f.proprietaire ? 'create-outline' : 'add-circle-outline'"></ion-icon>
+              {{ f.proprietaire ? 'Modifier' : 'Évaluer' }}
+            </button>
+          </div>
+          <p *ngIf="f.proprietaire">{{ f.proprietaire.commentaire }}</p>
+          <p class="ev-vide" *ngIf="!f.proprietaire">Pas encore évalué pour ce mois.</p>
+          <span class="ev-date" *ngIf="f.proprietaire">
+            {{ f.proprietaire.modifie ? 'Modifiée le ' + dateHeure(f.proprietaire.modifieLe) : dateHeure(f.proprietaire.createdAt) }}
+          </span>
+        </div>
+
+        <!-- Auto-évaluation du gardien -->
+        <div class="ev-bloc gardien">
+          <div class="ev-bloc-tete">
+            <strong><ion-icon name="person-outline"></ion-icon> Auto-évaluation du gardien</strong>
+          </div>
+          <p *ngIf="f.autoGardien">{{ f.autoGardien.commentaire }}</p>
+          <p class="ev-vide" *ngIf="!f.autoGardien">Le gardien n'a pas encore rempli son auto-évaluation.</p>
+          <span class="ev-date" *ngIf="f.autoGardien">
+            {{ f.autoGardien.modifie ? 'Modifiée le ' + dateHeure(f.autoGardien.modifieLe) : dateHeure(f.autoGardien.createdAt) }}
+          </span>
+        </div>
+      </div>
+    </ng-container>
+
+  </div>
+
+</app-shell>

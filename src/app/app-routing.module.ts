@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { proprietaireGuard, visiteurGuard } from './guards/proprietaire.guard';
+import { locataireGuard, proprietaireGuard, visiteurGuard } from './guards/proprietaire.guard';
 
 const routes: Routes = [
   // Démarrage : session stockée -> accueil, sinon connexion (voir proprietaireGuard)
@@ -37,6 +37,11 @@ const routes: Routes = [
         loadChildren: () => import('./pages/propriete-detail/propriete-detail.module').then(m => m.ProprieteDetailPageModule)
       },
       {
+        // Sous-comptes locataires (un par logement) ; ?propriete=<id> pour une seule propriété
+        path: 'locataires',
+        loadChildren: () => import('./pages/locataires/locataires.module').then(m => m.LocatairesPageModule)
+      },
+      {
         path: 'gardiens/:id',
         loadChildren: () => import('./pages/gardien-detail/gardien-detail.module').then(m => m.GardienDetailPageModule)
       },
@@ -61,12 +66,41 @@ const routes: Routes = [
         loadChildren: () => import('./pages/rapports/rapports.module').then(m => m.RapportsPageModule)
       },
       {
+        path: 'evaluations',
+        loadChildren: () => import('./pages/evaluations/evaluations.module').then(m => m.EvaluationsPageModule)
+      },
+      {
         path: 'abonnements',
         loadChildren: () => import('./pages/abonnements/abonnements.module').then(m => m.AbonnementsPageModule)
       },
       {
         path: 'profil',
         loadChildren: () => import('./pages/profil/profil.module').then(m => m.ProfilPageModule)
+      }
+    ]
+  },
+  {
+    // Espace du locataire (compte créé par son propriétaire) : son logement et le chat
+    // avec son propriétaire et les gardiens en service sur la propriété
+    path: 'locataire',
+    canActivate: [locataireGuard],
+    children: [
+      { path: '', redirectTo: 'accueil', pathMatch: 'full' },
+      {
+        path: 'accueil',
+        loadChildren: () => import('./pages/locataire-accueil/locataire-accueil.module').then(m => m.LocataireAccueilPageModule)
+      },
+      {
+        path: 'messages',
+        loadChildren: () => import('./pages/conversations/conversations.module').then(m => m.ConversationsPageModule)
+      },
+      {
+        path: 'messages/:id',
+        loadChildren: () => import('./pages/conversation/conversation.module').then(m => m.ConversationPageModule)
+      },
+      {
+        path: 'profil',
+        loadChildren: () => import('./pages/locataire-profil/locataire-profil.module').then(m => m.LocataireProfilPageModule)
       }
     ]
   },

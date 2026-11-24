@@ -1,0 +1,144 @@
+// Évaluations mensuelles des gardiens (le reste vient de src/theme)
+
+.ev-form,
+.ev-filtre {
+  padding: 0;
+}
+
+.ev-form-tete {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 16px;
+  border: none;
+  background: none;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 700;
+
+  span { flex: 1; text-align: left; }
+
+  ion-icon:first-child { color: var(--app-accent); font-size: 18px; }
+}
+
+.ev-chevron {
+  flex-shrink: 0;
+  color: var(--app-text-secondary);
+  font-size: 18px;
+}
+
+.ev-form-corps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 16px 16px;
+}
+
+.ev-aide {
+  margin: 0;
+  color: var(--app-text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.ev-filtre {
+  padding: 4px 16px;
+}
+
+.ev-carte {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ev-tete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ev-corps {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  strong { color: var(--app-text); font-size: 15px; }
+}
+
+.ev-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--app-text-secondary);
+  font-size: 12.5px;
+
+  ion-icon { flex-shrink: 0; font-size: 14px; }
+}
+
+.ev-bloc {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--app-surface-2, rgba(128, 128, 128, 0.08));
+
+  &.proprietaire {
+    border-left: 4px solid var(--gd-gold);
+    background: rgba(212, 175, 55, 0.12);
+  }
+
+  &.gardien {
+    border-left: 4px solid var(--app-accent);
+    background: rgba(56, 128, 255, 0.10);
+  }
+
+  p {
+    margin: 6px 0 0;
+    color: var(--app-text);
+    font-size: 13.5px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+
+  .ev-vide {
+    color: var(--app-text-secondary);
+    font-style: italic;
+  }
+}
+
+.ev-bloc-tete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  strong {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+}
+
+.ev-modifier {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  color: var(--gd-gold);
+  font-size: 12.5px;
+  font-weight: 700;
+
+  ion-icon { font-size: 15px; }
+}
+
+.ev-date {
+  display: block;
+  margin-top: 6px;
+  color: var(--app-text-secondary);
+  font-size: 11.5px;
+}
