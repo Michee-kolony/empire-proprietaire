@@ -24,6 +24,12 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Empire Security utilise votre appareil photo pour vous permettre de prendre des photos et de les joindre à vos messages et à votre profil dans l’application.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Empire Security utilise l’accès en ajout à votre photothèque pour enregistrer les photos que vous prenez ou choisissez de conserver depuis l’application.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Empire Security utilise votre photothèque pour vous permettre de sélectionner et joindre des photos à votre profil et à vos demandes dans l’application.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

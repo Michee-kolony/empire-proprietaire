@@ -28,3 +28,20 @@ writeFileSync(pbxproj, readFileSync(pbxproj, 'utf8').replace(
 ));
 
 console.log(`iOS : ${appName} (${appId})`);
+
+// Sous Windows, "cap sync" écrit des chemins avec "\\" dans Package.swift, invalides en Swift.
+const spm = 'ios/App/CapApp-SPM/Package.swift';
+if (existsSync(spm)) {
+  writeFileSync(spm, readFileSync(spm, 'utf8').replace(
+    /path: "([^"]+)"/g,
+    (_, p) => `path: "${p.replaceAll(String.fromCharCode(92), '/')}"`
+  ));
+}
+
+// Descriptions exigées par Apple pour @capacitor/camera (ITMS-90683)
+const plistFinal = readFileSync(plist, 'utf8');
+for (const key of ['NSCameraUsageDescription', 'NSPhotoLibraryAddUsageDescription', 'NSPhotoLibraryUsageDescription']) {
+  if (!new RegExp(`<key>${key}</key>[^<]*<string>[^<]+</string>`).test(plistFinal)) {
+    throw new Error(`${key} absente de ${plist}`);
+  }
+}
